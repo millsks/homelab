@@ -8,11 +8,37 @@ version = "0.1.0"
 [tasks]
 bootstrap = "pre-commit install --install-hooks"
 fmt = "sh -c 'ruff format . 2>/dev/null || true; [ -d tofu ] && tofu fmt -recursive tofu || true'"
-lint-py = "sh -c 'ruff check . || exit 1'"
-lint-yaml = "yamllint ."
-lint-ansible = """sh -c '[ -d ansible ] && ansible-lint ansible || echo "no ansible/ yet — skipping"'"""
-check = """sh -c '[ -d src ] && mypy src || echo "no src/ yet — skipping"'"""
-tofu-validate = """sh -c '[ -d tofu ] && (cd tofu && tofu init -backend=false && tofu validate) || echo "no tofu/ yet — skipping"'"""
+lint-py = "ruff check ."
+lint-yaml = "yamllint --strict ."
+# Guards use `if`, never `dir && cmd || echo`: with `||` any non-zero exit from the
+# command takes the echo branch and the task reports success, so a real lint failure
+# passes the gate. Only the directory test may short-circuit.
+lint-ansible = '''sh -c 'if [ -d ansible ]; then ansible-lint ansible; else echo "no ansible/ yet — skipping"; fi' '''
+check = '''sh -c 'if [ -d src ]; then mypy src; else echo "no src/ yet — skipping"; fi' '''
+# `tofu validate` has no -recursive and evaluates exactly one root module directory,
+# so validating `tofu/` itself validates nothing once the .tf files live in tofu/l*/.
+# Each layer directory holding *.tf is its own root module and is validated separately.
+tofu-validate = '''
+sh -c '
+if [ ! -d tofu ]; then echo "no tofu/ yet — skipping"; exit 0; fi
+processed=0
+failed=0
+for d in tofu/*/; do
+  if ls "$d"*.tf >/dev/null 2>&1; then
+    processed=$((processed + 1))
+    echo "==> tofu validate $d"
+    if ( cd "$d" && tofu init -backend=false -input=false >/dev/null && tofu validate ); then
+      :
+    else
+      failed=$((failed + 1))
+      echo "FAILED: $d"
+    fi
+  fi
+done
+echo "tofu-validate: $processed root module(s) processed, $failed failed"
+[ "$failed" -eq 0 ]
+'
+'''
 sprint-status = "python .claude/skills/bmad-sprint-planning/scripts/sprint_plan.py status --status-file _bmad-output/implementation-artifacts/sprint-status.yaml"
 sprint-validate = "python .claude/skills/bmad-sprint-planning/scripts/sprint_plan.py validate --status-file _bmad-output/implementation-artifacts/sprint-status.yaml"
 lint = { cmd = 'echo "lint complete"', depends-on = ["lint-py", "lint-yaml", "lint-ansible"] }
