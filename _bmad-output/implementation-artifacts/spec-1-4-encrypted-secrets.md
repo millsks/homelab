@@ -2,7 +2,7 @@
 title: 'Story 1.4 — Encrypted secrets before a secret store exists'
 type: 'feature'
 created: '2026-08-29'
-status: 'in-progress'
+status: 'done'
 review_loop_iteration: 0
 baseline_commit: 'b8bad518c8ab9f06d9e9942bb1f2794d38077186'
 context:
