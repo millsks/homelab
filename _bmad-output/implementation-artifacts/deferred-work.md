@@ -94,3 +94,11 @@ thing done in a way that preserves the original text.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-convergence-test-harness.md`
   summary: `src/asgard_harness/__main__.py` remains the one file no test executes.
   evidence: Coverage is 98.89% with that module at 0%: its body only runs under `python -m asgard_harness`, which the tests reach through `cli.main` instead. It is five lines with no branch of its own, and `pixi run audit` and `selfcheck` invoke it for real in the gate, so a broken `__main__` fails CI immediately. Recorded because "98.89%" should not read as "everything ran" — which is the same conflation this story's review was about.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-3-convergence-test-harness.md`
+  summary: A pre-commit hook was installed into .git/hooks during story 1.3 with no `.pre-commit-config.yaml` present, blocking every commit until it was uninstalled.
+  evidence: Something ran `pixi run bootstrap` — the task recorded as broken in this ledger since story 1.1 — which installs the hook regardless of whether a config exists. The failure surfaced as a rejected commit that a careless read of the surrounding output would have reported as successful. Story 1.4 owns `.pre-commit-config.yaml` because the plaintext-secret rejection is its main reason to exist; when it lands, `pixi run bootstrap` becomes safe and the hook can be reinstalled deliberately. Until then `bootstrap` should not be run.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-3-convergence-test-harness.md`
+  summary: `check_layer_dependencies` is textual, so a Runbook legitimately naming a higher layer in prose fails the gate.
+  evidence: It fired during story 1.3 on a sample output block inside an l0-physical Runbook that quoted push-based layer names. The document was reworded rather than the detector relaxed, which was the right call, but the detector needs a scoping rule — code and path references are the target, prose is not — rather than an exemption list that grows one entry per false positive.
