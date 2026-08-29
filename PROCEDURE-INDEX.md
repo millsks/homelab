@@ -285,14 +285,16 @@ closing the spike. It is not closed.
 | --- | --- | --- | --- | --- | --- | --- |
 | `PROC-REPO-SKELETON` | Repository skeleton with layered ownership | `l0-physical` | 1.1 | `docs/OWNERSHIP.md` | none — by decision | `manual-by-decision` |
 | `PROC-PROCEDURE-INDEX` | Procedure Index and the dual-form contract | `l0-physical` | 1.2 | `PROCEDURE-INDEX.md` | none — by decision | `manual-by-decision` |
-| `PROC-CONVERGENCE-HARNESS` | Convergence test harness | `l0-physical` | 1.3 | `runbooks/l0-physical/convergence-harness.md` | `pixi.toml` | `incomplete` |
+| `PROC-CONVERGENCE-HARNESS` | Convergence test harness | `l0-physical` | 1.3 | `runbooks/l0-physical/convergence-harness.md` | `pixi.toml` | `complete` |
 | `PROC-REPO-SECRETS` | Encrypted secrets before a secret store exists | `l0-physical` | 1.4 | `runbooks/l0-physical/repo-secrets.md` | `.sops.yaml` | `planned` |
 
-`PROC-CONVERGENCE-HARNESS` is `incomplete`, not `planned`: `pixi.toml` exists and already runs the
-gate, while its Runbook does not exist. That is exactly one half present, which is the
-incomplete-Procedure defect this file defines. It is recorded rather than rounded down, because an
-Index that softened its own first defect would have no standing to report anyone else's. Story 1.3
-closes it by writing the Runbook.
+`PROC-CONVERGENCE-HARNESS` was recorded here as `incomplete` — `pixi.toml` existed and already ran
+the gate, while its Runbook did not. That was exactly one half present, which is the
+incomplete-Procedure defect this file defines, and it was recorded rather than rounded down because
+an Index that softened its own first defect would have no standing to report anyone else's. Story
+1.3 closed it by writing [`runbooks/l0-physical/convergence-harness.md`](runbooks/l0-physical/convergence-harness.md)
+and adding the back-reference comment to `pixi.toml`. It is the Index's first `complete` entry, and
+the audit that reports the defect is the same audit that now agrees the defect is gone.
 
 ### Epic 2 — Nodes, cluster, network, and break-glass
 
@@ -456,18 +458,27 @@ from `epics.md`; a disagreement is a defect, not a rounding.
 | Stories in [`epics.md`](_bmad-output/planning-artifacts/epics.md) at `f5471f8` | 67 |
 | Entries in this Index | 68 |
 | Stories carrying two entries under the two-owner exception | 1 |
-| `complete` | 0 |
-| `incomplete` | 1 |
+| `complete` | 1 |
+| `incomplete` | 0 |
 | `manual-by-decision` | 9 |
 | `planned` | 58 |
-| Human forms written | 2 |
+| Human forms written (`manual-by-decision` entries) | 2 |
 
 Per layer: `l0-physical` 13 · `l1-hypervisor` 8 · `l2-foundation` 12 · `l3-platform` 13 ·
 `l4-services` 20 · `l5-workloads` 2.
 
-Zero `complete` entries is the accurate reading of a platform whose first Procedure has not yet been
-executed against hardware. It is not a defect. The `planned` entries are the denominator FR-1 was
+One `complete` entry is the accurate reading of a platform whose first Procedure against hardware
+has not yet been executed: the sole `complete` entry is `PROC-CONVERGENCE-HARNESS`, which runs on
+the control node and touches no managed system. The `planned` entries are the denominator FR-1 was
 missing.
+
+Every figure above is recomputed by `pixi run audit` from the entry tables and from `epics.md`;
+"Human forms written" is recomputed from the filesystem. Its label now names its scope, because it
+totals the "Human form written?" column of [Deliberately manual work](#deliberately-manual-work)
+and nothing else — Runbook presence for the other statuses is what those statuses already record,
+and a figure whose scope has to be inferred is a figure that will be recomputed wrongly. A figure
+this file states that the audit does not know how to recompute is itself reported as a defect,
+because a number nothing checks is a number that goes stale.
 
 ### What these counts do and do not measure
 
@@ -502,11 +513,17 @@ that builds it. That is the single rule; [`runbooks/TEMPLATE.md`](runbooks/TEMPL
 same one from the writer's side. Registration is not deferred to 13.5 — 13.5 consumes this table, it
 does not populate it.
 
-The table is empty because no detector exists yet. An empty table means "none registered", which is
-different from "none required": four are required by the epics above and none has been built.
+Story 1.3 built the first three detectors and registered them below. They are the harness's own runs,
+not any Procedure's check-mode run: the four required by the epics above — one per push-based
+Automation — still do not exist, because no push-based Automation exists. `pixi run drift` is the
+mechanism those four will register through; it reports zero targets today and says so rather than
+reporting a pass over an empty set.
 
 | Source | Registering story | Wired by | Status |
 | --- | --- | --- | --- |
+| `pixi run drift` — scheduled check-mode run over the push-based layers L0–L2. A non-empty diff exits non-zero, as does a run that failed to complete; every run is recorded to `drift-record.json` | 1.3 | 13.5 | Registered, unwired |
+| `pixi run audit` — the Index and ownership audit. Any defect class named exits non-zero | 1.3 | 13.5 | Registered, unwired |
+| `pixi run converge` — scheduled AD-3 convergence and NFR-3 idempotence run: every Automation run twice, first run for convergence and second for idempotence. A check-mode run that *failed to complete* exits non-zero too, and is never read as a clean run | 1.3 | 13.5 | Registered, unwired |
 
 ---
 
