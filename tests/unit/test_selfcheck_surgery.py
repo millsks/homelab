@@ -230,6 +230,7 @@ def test_copy_set_covers_every_path_a_detector_reads(repo_workspace: Workspace):
     roots = {
         repo_workspace.relative(repo_workspace.index_path),
         repo_workspace.relative(repo_workspace.ownership_path),
+        repo_workspace.relative(repo_workspace.address_plan_path),
         repo_workspace.relative(repo_workspace.epics_path),
         repo_workspace.relative(repo_workspace.runbooks_dir),
         repo_workspace.relative(repo_workspace.template_path),

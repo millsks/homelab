@@ -79,6 +79,15 @@ class Workspace:
         return self.root / "docs" / "OWNERSHIP.md"
 
     @property
+    def address_plan_path(self) -> Path:
+        """Path to the address plan.
+
+        Returns:
+            `docs/ADDRESS-PLAN.md` under the root.
+        """
+        return self.root / "docs" / "ADDRESS-PLAN.md"
+
+    @property
     def epics_path(self) -> Path:
         """Path to the story list the Index derives from.
 
