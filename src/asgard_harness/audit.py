@@ -1,7 +1,7 @@
 """The audit: every detector, run against one workspace, reported as one thing.
 
-The order below is the order the two documents state their defect classes in, so a reader can hold
-the report and the definition side by side.
+The order below is the order the governing documents state their defect classes in, so a reader can
+hold the report and the definition side by side.
 
 **`run_audit` is a pure reader and must stay one.** It parses committed documents and stats the
 working tree; it opens no network connection, needs no credential, and touches no managed system.
@@ -16,7 +16,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from asgard_harness import checks_crossdoc, checks_index, checks_ownership, checks_secrets, convergence
+from asgard_harness import (
+    checks_address_plan,
+    checks_crossdoc,
+    checks_index,
+    checks_ownership,
+    checks_secrets,
+    convergence,
+)
+from asgard_harness.address_plan_document import load_address_plan
 from asgard_harness.epics import load_stories
 from asgard_harness.findings import AuditReport, CheckResult, report_of
 from asgard_harness.index_document import load_index
@@ -52,6 +60,7 @@ def run_audit(workspace: Workspace, *, resolve_commit: CommitResolver | None = N
     index = load_index(workspace.index_path)
     ownership = load_ownership(workspace.ownership_path)
     stories = load_stories(workspace.epics_path)
+    address_plan = load_address_plan(workspace.address_plan_path)
 
     results: list[CheckResult] = [
         checks_index.check_status_enumeration(index),
@@ -74,6 +83,7 @@ def run_audit(workspace: Workspace, *, resolve_commit: CommitResolver | None = N
         checks_ownership.check_verification_present(ownership),
         checks_ownership.check_procedure_coverage(ownership, index),
         checks_ownership.unowned_defect_status(ownership),
+        *checks_address_plan.run_address_plan_checks(address_plan),
         *checks_secrets.run_secret_checks(workspace, load_policy(workspace.root / POLICY_FILENAME)),
         checks_index.check_totals(index, stories, workspace),
     ]

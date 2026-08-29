@@ -70,6 +70,9 @@ _COPY_IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache", "
 
 ENTRY_ANCHOR = "## The Index"
 MANUAL_ANCHOR = "## Deliberately manual work"
+SEGMENT_ANCHOR = "## Segments"
+RANGE_ANCHOR = "## Address ranges"
+ALLOCATION_ANCHOR = "## Allocations"
 
 _STATUS_COLUMN = 6
 _AUTOMATION_COLUMN = 5
@@ -80,6 +83,12 @@ _HUMAN_FORM_COLUMN = 4
 _OWNER_COLUMN = 1
 _OWNERSHIP_VERIFICATION_COLUMN = 3
 _OWNERSHIP_PROCEDURE_COLUMN = 4
+
+_SEGMENT_GATEWAY_COLUMN = 3
+_ALLOCATION_ADDRESS_COLUMN = 0
+_ALLOCATION_SEGMENT_COLUMN = 1
+_ALLOCATION_HOLDS_COLUMN = 2
+_ALLOCATION_KIND_COLUMN = 3
 
 SUBJECT_KEY = "PROC-REBUILD-DRILL"
 """The entry the Index fixtures mutate, and the three values derived from it.
@@ -406,6 +415,91 @@ def _uncovered_ownership_class(workspace: Workspace) -> None:
     set_cell(workspace.ownership_path, "This ownership table", _OWNERSHIP_PROCEDURE_COLUMN, "`PROC-DOES-NOT-EXIST`")
 
 
+# --- Address-plan fixtures (story 2.1) -----------------------------------------------------------
+#
+# These address the plan STRUCTURALLY, by the key of the row they mutate, for the same reason the
+# totals fixtures do. They deliberately do not funnel through a single subject row the way the Index
+# fixtures funnel through SUBJECT_KEY: the plan's rows are not interchangeable — one is a Node, one
+# is an appliance, one is on the isolated segment — and each fixture needs the row whose kind makes
+# its defect reachable at all. The rows chosen are the ones whose meaning is least likely to move:
+# a Node's two addresses, the appliance, the membership segment, and a range holding no allocation.
+
+_PLAN_NODE_DATA_ADDRESS = "192.168.86.12"
+_PLAN_NODE_MEMBERSHIP_ADDRESS = "172.16.8.14"
+_PLAN_APPLIANCE_ADDRESS = "192.168.86.10"
+_PLAN_POOL_ADDRESS = "`192.168.86.150`"
+_PLAN_RESERVED_ADDRESS = "`192.168.86.25`"
+_PLAN_ISOLATED_SEGMENT = "membership"
+_PLAN_EMPTY_RANGE = "data-guests"
+
+
+def _address_collision(workspace: Workspace) -> None:
+    duplicate_row(
+        workspace.address_plan_path,
+        _PLAN_NODE_DATA_ADDRESS,
+        {_ALLOCATION_HOLDS_COLUMN: "`impostor`", _ALLOCATION_KIND_COLUMN: "`appliance`"},
+        anchor=ALLOCATION_ANCHOR,
+    )
+
+
+def _address_in_dhcp_pool(workspace: Workspace) -> None:
+    set_cell(
+        workspace.address_plan_path,
+        _PLAN_NODE_DATA_ADDRESS,
+        _ALLOCATION_ADDRESS_COLUMN,
+        _PLAN_POOL_ADDRESS,
+        anchor=ALLOCATION_ANCHOR,
+    )
+
+
+def _reservation_consumed(workspace: Workspace) -> None:
+    set_cell(
+        workspace.address_plan_path,
+        _PLAN_NODE_DATA_ADDRESS,
+        _ALLOCATION_ADDRESS_COLUMN,
+        _PLAN_RESERVED_ADDRESS,
+        anchor=ALLOCATION_ANCHOR,
+    )
+
+
+def _node_on_one_segment(workspace: Workspace) -> None:
+    delete_row(workspace.address_plan_path, _PLAN_NODE_MEMBERSHIP_ADDRESS, anchor=ALLOCATION_ANCHOR)
+
+
+def _route_on_isolated_segment(workspace: Workspace) -> None:
+    set_cell(
+        workspace.address_plan_path,
+        _PLAN_ISOLATED_SEGMENT,
+        _SEGMENT_GATEWAY_COLUMN,
+        "`172.16.8.1`",
+        anchor=SEGMENT_ANCHOR,
+    )
+
+
+def _illegal_allocation_kind(workspace: Workspace) -> None:
+    set_cell(
+        workspace.address_plan_path,
+        _PLAN_APPLIANCE_ADDRESS,
+        _ALLOCATION_KIND_COLUMN,
+        "`whatever it turns out to be`",
+        anchor=ALLOCATION_ANCHOR,
+    )
+
+
+def _range_leaves_a_gap(workspace: Workspace) -> None:
+    delete_row(workspace.address_plan_path, _PLAN_EMPTY_RANGE, anchor=RANGE_ANCHOR)
+
+
+def _address_in_no_declared_range(workspace: Workspace) -> None:
+    set_cell(
+        workspace.address_plan_path,
+        _PLAN_APPLIANCE_ADDRESS,
+        _ALLOCATION_SEGMENT_COLUMN,
+        "`storage`",
+        anchor=ALLOCATION_ANCHOR,
+    )
+
+
 # The armour line is assembled rather than written out, because the secret scan walks `src/` and a
 # module containing a real private-key header would fail the very check it exists to prove. Any
 # fixture for this detector has that shape: the known-bad state cannot be a literal in the tree
@@ -480,6 +574,26 @@ FIXTURES: tuple[Fixture, ...] = (
         _missing_ownership_verification,
     ),
     Fixture("a resource class names no real Procedure", defects.UNCOVERED_OWNERSHIP_CLASS, _uncovered_ownership_class),
+    Fixture("two allocations claim one address", defects.ADDRESS_PLAN_COLLISION, _address_collision),
+    Fixture("a static address falls inside the DHCP pool", defects.ADDRESS_PLAN_IN_DHCP_POOL, _address_in_dhcp_pool),
+    Fixture(
+        "an allocation consumes a growth reservation",
+        defects.ADDRESS_PLAN_RESERVATION_CONSUMED,
+        _reservation_consumed,
+    ),
+    Fixture("a Node loses one of its two segments", defects.ADDRESS_PLAN_NODE_ON_ONE_SEGMENT, _node_on_one_segment),
+    Fixture(
+        "the isolated segment gains a gateway",
+        defects.ADDRESS_PLAN_ROUTE_ON_ISOLATED,
+        _route_on_isolated_segment,
+    ),
+    Fixture("an allocation's kind is a sentence", defects.ADDRESS_PLAN_ILLEGAL_KIND, _illegal_allocation_kind),
+    Fixture("the declared ranges stop tiling a segment", defects.ADDRESS_PLAN_RANGE_COVERAGE, _range_leaves_a_gap),
+    Fixture(
+        "an allocation names a segment nothing declares",
+        defects.ADDRESS_PLAN_UNDECLARED_ADDRESS,
+        _address_in_no_declared_range,
+    ),
     Fixture("a plaintext credential reaches the tree", defects.PLAINTEXT_SECRET, _plaintext_secret),
     Fixture(
         "a path the policy covers is committed unencrypted",

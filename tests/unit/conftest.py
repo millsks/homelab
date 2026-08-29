@@ -119,6 +119,54 @@ no `.sops.yaml` is a defect, which is the whole point of that detector, and a ba
 would make every other unit test fail for an unrelated reason.
 """
 
+MINI_ADDRESS_PLAN = """# Address Plan
+
+## Segments
+
+| Segment | Network | Mask | Gateway | Isolated | Purpose |
+| --- | --- | --- | --- | --- | --- |
+| `data` | `10.0.0.0/29` | `255.255.255.248` | `10.0.0.1` | no | Bulk traffic. |
+| `membership` | `10.9.9.0/29` | `255.255.255.248` | none — no route off-segment | yes | Membership only. |
+
+## Address ranges
+
+| Range | Segment | First | Last | Type | Purpose |
+| --- | --- | --- | --- | --- | --- |
+| `data-network` | `data` | `10.0.0.0` | `10.0.0.0` | `reserved` | Network address. |
+| `data-edge` | `data` | `10.0.0.1` | `10.0.0.1` | `allocatable` | The router. |
+| `data-hosts` | `data` | `10.0.0.2` | `10.0.0.3` | `allocatable` | Hosts. |
+| `data-growth` | `data` | `10.0.0.4` | `10.0.0.4` | `reserved` | Growth: a third host. |
+| `data-dhcp` | `data` | `10.0.0.5` | `10.0.0.6` | `dhcp-pool` | The router hands these out. |
+| `data-broadcast` | `data` | `10.0.0.7` | `10.0.0.7` | `reserved` | Broadcast address. |
+| `membership-network` | `membership` | `10.9.9.0` | `10.9.9.0` | `reserved` | Network address. |
+| `membership-nodes` | `membership` | `10.9.9.1` | `10.9.9.3` | `allocatable` | Node membership interfaces. |
+| `membership-growth` | `membership` | `10.9.9.4` | `10.9.9.6` | `reserved` | Growth: a third node. |
+| `membership-broadcast` | `membership` | `10.9.9.7` | `10.9.9.7` | `reserved` | Broadcast address. |
+
+## Allocations
+
+| Address | Segment | Holds | Kind | Interface | Traffic class | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `10.0.0.1` | `data` | `mini-router` | `gateway` | Its LAN interface | Outbound | |
+| `10.0.0.2` | `data` | `node-a` | `node` | Adapter | Bulk | |
+| `10.0.0.3` | `data` | `node-b` | `node` | Adapter | Bulk | |
+| `10.9.9.2` | `membership` | `node-a` | `node` | Onboard | Membership | |
+| `10.9.9.3` | `membership` | `node-b` | `node` | Onboard | Membership | |
+
+## Kinds — a closed enumeration
+
+| Kind | Means |
+| --- | --- |
+| `node` | Homed on every declared segment. |
+| `gateway` | The default route off a segment. |
+| `appliance` | Single-homed on the data segment. |
+"""
+"""The miniature address plan.
+
+Deliberately tiny — two `/29` segments — because the coverage detector requires the declared ranges
+to tile their segment exactly, and a `/24` would need ten rows per segment to say the same thing.
+"""
+
 MINI_EPICS = """# Mini epics
 
 ### Story 1.1: One
@@ -180,6 +228,7 @@ def build_mini_repo(root: Path) -> Workspace:
     (root / "PROCEDURE-INDEX.md").write_text(MINI_INDEX, encoding="utf-8")
     (root / ".sops.yaml").write_text(MINI_SOPS, encoding="utf-8")
     (root / "docs" / "OWNERSHIP.md").write_text(MINI_OWNERSHIP, encoding="utf-8")
+    (root / "docs" / "ADDRESS-PLAN.md").write_text(MINI_ADDRESS_PLAN, encoding="utf-8")
     (root / "docs" / "MANUAL.md").write_text("# Manual record\n", encoding="utf-8")
     (root / "_bmad-output" / "planning-artifacts" / "epics.md").write_text(MINI_EPICS, encoding="utf-8")
     (root / "runbooks" / "TEMPLATE.md").write_text(MINI_TEMPLATE, encoding="utf-8")

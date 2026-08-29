@@ -16,7 +16,9 @@ from pathlib import Path
 import pytest
 from ruamel import yaml
 
+from asgard_harness.address_plan_document import GATEWAY_KIND, NO_ROUTE_LITERAL, load_address_plan
 from asgard_harness.audit import EXPECTED_AUDIT_SKIPS, run_audit, run_convergence, run_drift, run_secrets
+from asgard_harness.checks_address_plan import run_address_plan_checks
 from asgard_harness.checks_secrets import is_sops_encrypted
 from asgard_harness.findings import CheckStatus
 from asgard_harness.index_document import load_index
@@ -183,6 +185,127 @@ def test_the_selfcheck_subject_entry_is_still_inert(repo_workspace: Workspace):
     assert not repo_workspace.declared_exists(entry.automation)
     assert entry.runbook == SUBJECT_RUNBOOK
     assert [e.key for e in index.entries if e.story == entry.story] == [SUBJECT_KEY]
+
+
+# --- Story 2.1: the address plan ------------------------------------------------------------------
+
+
+def test_the_address_plan_is_the_human_form_of_its_procedure(repo_workspace: Workspace):
+    """The forward reference this story resolves, asserted against both documents."""
+    index = load_index(repo_workspace.index_path)
+    entry = index.entry("PROC-ADDRESS-PLAN")
+    assert entry is not None
+    assert entry.status == "manual-by-decision"
+    assert entry.runbook == "docs/ADDRESS-PLAN.md"
+    assert repo_workspace.declared_exists(entry.runbook)
+
+    row = index.manual_row("PROC-ADDRESS-PLAN")
+    assert row is not None
+    assert row.human_form_written is True
+
+    ownership = load_ownership(repo_workspace.ownership_path)
+    plan_rows = [row for row in ownership.rows if "ADDRESS-PLAN.md" in row.mechanism]
+    assert plan_rows, "no ownership row declares the address plan"
+    assert all("forward reference" not in row.mechanism for row in plan_rows)
+
+
+def test_the_forward_reference_table_no_longer_owes_the_address_plan(repo_root: Path):
+    """A forward-reference list that retains resolved entries stops being a list of what is missing."""
+    text = (repo_root / "docs" / "OWNERSHIP.md").read_text(encoding="utf-8")
+    owed = text.split("| Path | Owed by |", 1)[1].split("\n\n", 1)[0]
+    assert "ADDRESS-PLAN.md" not in owed, owed
+    assert "ESCROW.md" in owed
+
+
+def test_the_real_address_plan_is_internally_consistent(repo_workspace: Workspace):
+    """Every address-plan detector runs against the committed plan and reports what it examined."""
+    plan = load_address_plan(repo_workspace.address_plan_path)
+    results = run_address_plan_checks(plan)
+    assert results, "no address-plan detector ran"
+    for check in results:
+        assert check.status is CheckStatus.PASSED, check.render()
+        assert check.examined > 0, f"{check.name} examined nothing"
+
+
+def test_every_declared_static_sits_outside_the_household_dhcp_pool(repo_workspace: Workspace):
+    """The manual check the story states, made executable against the real plan.
+
+    Asserted here as well as by the detector because the pool boundaries are a measured fact about
+    somebody's house, not a value this Repository chooses — a change to them has to be noticed.
+    """
+    plan = load_address_plan(repo_workspace.address_plan_path)
+    pools = [entry for entry in plan.ranges if entry.is_dhcp_pool]
+    assert [entry.label for entry in pools] == ["data-dhcp (192.168.86.100-192.168.86.200)"]
+    for allocation in plan.allocations:
+        address = allocation.address
+        assert address is not None, allocation.address_cell
+        assert not any(entry.contains(address) for entry in pools), allocation.address_cell
+
+
+def test_the_membership_segment_declares_no_gateway_anywhere(repo_workspace: Workspace):
+    """The second manual check: no gateway appears anywhere in the membership segment's entries."""
+    plan = load_address_plan(repo_workspace.address_plan_path)
+    membership = plan.segment("membership")
+    assert membership is not None
+    assert membership.is_isolated is True
+    assert membership.gateway == NO_ROUTE_LITERAL
+    on_segment = [a for a in plan.allocations if a.segment == "membership"]
+    assert on_segment, "the membership segment holds no allocations at all"
+    assert all(allocation.kind != GATEWAY_KIND for allocation in on_segment)
+
+
+def test_every_node_carries_one_address_on_each_segment_with_a_matching_last_octet(repo_workspace: Workspace):
+    """The Design Note convention, asserted rather than trusted.
+
+    The detector enforces one address per segment per Node; the shared last octet is a readability
+    convention the detector deliberately does not police, so it is pinned here instead — a
+    convention nothing checks is a convention that quietly stops holding.
+    """
+    plan = load_address_plan(repo_workspace.address_plan_path)
+    nodes: dict[str, dict[str, str]] = {}
+    for allocation in plan.allocations:
+        if allocation.kind != "node":
+            continue
+        nodes.setdefault(allocation.holds, {})[allocation.segment] = allocation.address_cell
+    assert sorted(nodes) == ["heimdall", "odin", "thor", "tyr"]
+    for host, addresses in nodes.items():
+        assert sorted(addresses) == ["data", "membership"], host
+        octets = {value.rsplit(".", 1)[1] for value in addresses.values()}
+        assert len(octets) == 1, f"{host} has different last octets across segments: {addresses}"
+
+
+def test_the_only_uplink_is_declared_and_owned(repo_workspace: Workspace):
+    """The bridge is the platform's single outbound path, and it drifted once already.
+
+    A decision to deploy it was reversed across three planning documents and missed in a fourth, and
+    the first draft of this plan read the stale one and declared the device unaddressed. Nothing in
+    the harness could catch that — no rule checks a planning artifact against another — so the
+    agreement between the plan and the ownership table is pinned here instead.
+    """
+    plan = load_address_plan(repo_workspace.address_plan_path)
+    bridge = [a for a in plan.allocations if a.holds == "wireless-bridge"]
+    assert len(bridge) == 1, "the platform's only uplink must carry exactly one declared address"
+    assert bridge[0].segment == "data"
+    assert bridge[0].kind == "network device"
+    assert bridge[0].address is not None
+
+    holding = plan.containing_ranges(bridge[0])
+    assert holding, "the uplink's address falls in no declared range"
+    assert all(entry.is_allocatable for entry in holding), [entry.label for entry in holding]
+
+    ownership = load_ownership(repo_workspace.ownership_path)
+    rows = [row for row in ownership.rows if "wireless bridge" in row.resource_class.casefold()]
+    assert len(rows) == 1, "the bridge must keep exactly one ownership row"
+    assert "PROC-ADDRESS-PLAN" in rows[0].procedures
+    assert "ADDRESS-PLAN.md" in rows[0].notes, "the row must point at the address that covers it"
+
+
+def test_the_address_plan_check_is_registered_as_an_alert_source(repo_workspace: Workspace):
+    index = load_index(repo_workspace.index_path)
+    registered = [source for source in index.alert_sources if "address-plan" in source.source]
+    assert registered, "the address-plan detector must register as an alert source"
+    assert all(source.registering_story == "2.1" for source in registered)
+    assert all(source.wired_by == "13.5" for source in registered)
 
 
 def test_the_gate_chain_names_the_secret_scan(repo_root: Path):

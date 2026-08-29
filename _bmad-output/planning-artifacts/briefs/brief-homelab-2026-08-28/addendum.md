@@ -21,7 +21,7 @@ Depth captured during discovery that belongs to the PRD, the architecture spine,
 | **Purchased** | APC Smart-UPS SMT1500C | 1 | 1500 VA / 1000 W, pure sine, 8 outlets all battery-backed, hot-swap battery. Gate: verify against Synology's supported-UPS list before relying on DSM as NUT server. |
 | **Purchased** | UGREEN USB-A to 2.5 GbE adapter | 4 | Second interface per Node, carrying bulk traffic. Typically RTL8156-family on the `r8152` driver; Proxmox 8's 6.x kernel supports it. Verify deterministic interface naming on arrival - USB NIC naming is less stable than onboard and the address plan depends on it. |
 | **Purchased** | TP-Link Omada ES205G | 1 | The membership switch. 5-port gigabit, easy-managed, fanless, metal chassis, ~2-3 W. Run **standalone** - never adopted into an Omada controller. |
-| Network | TP-Link TL-WA3001 AX3000 AP | 1 | **Not deployed.** Served household wireless coverage, never Asgard. Removed from the topology to free a switch port; reintroduce only if household coverage requires it. |
+| Network | TP-Link TL-WA3001 AX3000 AP | 1 | **Deployed in client-bridge mode as the platform's only uplink.** Reversed from an earlier decision not to deploy it: the rack has no wired path to the household router - opposite side of the house, no spare ports, no coaxial anywhere - so the bridge is how outbound traffic leaves. Four external antennas suit a through-walls link. Carries outbound traffic only; nothing internal crosses it. |
 | Network | GL.iNet GL-BE3600 (Slate 7) travel router | 1 | Genuinely a travel router. Not a lab edge device. Useful as a portable VPN client or an isolated test bench. |
 
 ### Identified gaps
@@ -247,7 +247,7 @@ Epic 14 is the one that validates the lab's stated purpose. Epic 13 is the one t
 | **Total typical** | **~320 W** |
 | **Peak (all Nodes loaded, drives active)** | **~430 W** |
 
-The USB 2.5 GbE adapters draw from the Nodes' own USB ports and are already inside the per-Node figure. The access point is absent - it is not deployed.
+The USB 2.5 GbE adapters draw from the Nodes' own USB ports and are already inside the per-Node figure. The access point is powered as the uplink bridge and is included above.
 
 Against 1000 W the unit runs at roughly a third of capacity. Expected runtime at ~320 W is **an estimated 12-15 minutes, to be measured by Drill rather than assumed** - sufficient for orderly shutdown, insufficient for riding out an outage. Every decision below follows from that distinction.
 
@@ -309,7 +309,7 @@ The only acceptable proof is a live drill: pull mains power and observe the sequ
 Asgard shares the household LAN and runs **two switches carrying two kinds of traffic**.
 
 ```
-ISP router --uplink--> data switch (10-port) --+-- odin       2.5 GbE (adapter)
+ISP router ~~wireless bridge~~> data switch (10-port) --+-- odin   2.5 GbE (adapter)
     |                                          +-- thor       2.5 GbE (adapter)
     |                                          +-- heimdall   2.5 GbE (adapter)
     |                                          +-- tyr        2.5 GbE (adapter)
@@ -323,7 +323,9 @@ ISP router --uplink--> data switch (10-port) --+-- odin       2.5 GbE (adapter)
                                                     4 of 5 used, NO uplink
 ```
 
-**Why two switches.** Each Node gained a USB 2.5 GbE adapter, doubling its port demand from one to two. Against the 10-port switch that totalled eleven ports required for ten available. Dropping the access point - which only ever served household coverage - brought it to exactly ten of ten with no spare, which left no room for a fifth Node, a second Nidavellir link, or a laptop at the shelf. A five-port gigabit switch dedicated to membership traffic costs roughly fifteen dollars and returns four spare 2.5 GbE ports on the data switch.
+**Why two switches.** Each Node gained a USB 2.5 GbE adapter, doubling its port demand from one to two. Against the 10-port switch that totalled eleven ports required for ten available, and the access point could not simply be dropped to recover one - it is the uplink. A five-port gigabit switch dedicated to membership traffic costs roughly fifteen dollars and returns four spare 2.5 GbE ports on the data switch.
+
+**The uplink is wireless out of necessity.** The rack has no wired path to the household router: it sits in a closet on the opposite side of the house, the router has no spare ports, and there is no coaxial cabling in the building to carry MoCA. The access point therefore runs in client-bridge mode, connecting the data switch to the household wireless network. Only outbound traffic crosses it - package retrieval, image pulls, upstream time, and alerts - so a 100-200 Mbps link is adequate and the bottleneck lands where it does not matter. Cluster membership, storage, Workload and backup traffic never leave the two switches at the rack.
 
 The honest driver is **port headroom**, not fabric contention. The 10-port switch almost certainly has adequate backplane to carry membership signalling alongside storage traffic. Nor does the second switch buy availability - either switch failing disrupts the Cluster. What it buys is growth room and genuine separation, cheaply.
 

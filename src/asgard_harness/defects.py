@@ -79,6 +79,23 @@ PLAINTEXT_SECRET: Final = "plaintext-secret-in-repository"
 UNENCRYPTED_DECLARED_PATH: Final = "declared-encrypted-path-in-plaintext"
 UNDECLARED_ENCRYPTION_POLICY: Final = "encryption-policy-undeclared"
 
+# --- docs/ADDRESS-PLAN.md § "What the check enforces" ---------------------------------------------
+#
+# The address plan is a `docs/ record`: nothing executes it, so the only thing a machine can say
+# about it today is whether it agrees with itself. The plan's other verification — reconciliation
+# against Directory DNS and against what hosts actually answer — needs a directory and running
+# hosts, which stories 4.3 and 2.3 build. That gap is recorded in the deferred-work ledger rather
+# than closed by implementing something weaker under the same name.
+
+ADDRESS_PLAN_COLLISION: Final = "address-plan-collision"
+ADDRESS_PLAN_IN_DHCP_POOL: Final = "address-plan-inside-dhcp-pool"
+ADDRESS_PLAN_RESERVATION_CONSUMED: Final = "address-plan-reservation-consumed"
+ADDRESS_PLAN_NODE_ON_ONE_SEGMENT: Final = "address-plan-node-on-one-segment"
+ADDRESS_PLAN_ROUTE_ON_ISOLATED: Final = "address-plan-route-on-isolated-segment"
+ADDRESS_PLAN_ILLEGAL_KIND: Final = "address-plan-illegal-kind"
+ADDRESS_PLAN_RANGE_COVERAGE: Final = "address-plan-range-coverage"
+ADDRESS_PLAN_UNDECLARED_ADDRESS: Final = "address-plan-address-in-no-declared-range"
+
 # --- Layer discipline (the design's single enforceable claim) ------------------------------------
 
 UPWARD_LAYER_DEPENDENCY: Final = "upward-layer-dependency"

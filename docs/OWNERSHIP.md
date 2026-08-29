@@ -63,15 +63,16 @@ and they still carry an automated verification wherever a machine can observe th
 
 ### Forward references
 
-Two declaring mechanisms named below do not exist yet. They are listed so the class has a stated
-home rather than a blank, and each is marked *(forward reference — story N)* in the table. There
-were three until story 1.4 built `.sops.yaml`; its row is gone from this table rather than kept and
+One declaring mechanism named below does not exist yet. It is listed so the class has a stated
+home rather than a blank, and it is marked *(forward reference — story N)* in the table. There
+were three until story 1.4 built `.sops.yaml` and story 2.1 built
+[`docs/ADDRESS-PLAN.md`](ADDRESS-PLAN.md); their rows are gone from this table rather than kept and
 annotated, because a forward-reference list that retains resolved entries stops being a list of
-what is missing. They are
+what is missing. It is
 deliberately not stubbed: writing a placeholder before the owning story defines the format produces
 a file that story then has to undo.
 
-Every one of them now has a scheduled owning story, taken from
+It has a scheduled owning story, taken from
 [`PROCEDURE-INDEX.md`](../PROCEDURE-INDEX.md), which is authoritative for which story owns which
 Procedure. "Not yet scheduled" is no longer an answer this table may give: the Index enumerates what
 the platform requires, so a path owed by nobody is a Procedure nobody committed to writing.
@@ -79,7 +80,6 @@ the platform requires, so a path owed by nobody is a Procedure nobody committed 
 | Path | Owed by |
 | --- | --- |
 | `docs/ESCROW.md` | Story 14.2 — escrow completeness |
-| `docs/ADDRESS-PLAN.md` | Story 2.1 — address plan and interface allocation |
 
 This file otherwise holds itself to the rule it states: every other path named below exists.
 
@@ -131,10 +131,10 @@ share a Node" is therefore *stated* by the layer that cares about it and *declar
 | Node firmware / BIOS settings (boot order, virtualisation extensions, power-loss behaviour, firmware admin password) | `Runbook` | `runbooks/l0-physical/` | Automated where readable from the host OS; direct firmware-screen reading otherwise | `PROC-OOB-MANAGEMENT` | Firmware survives an OS reinstall. AD-28: "we reimaged it" is not a check. |
 | Out-of-band management state (enabled/disabled, credentials, network) | `Runbook` | `runbooks/l0-physical/` | Automated: port probe from another host **plus** a direct firmware-screen reading | `PROC-OOB-MANAGEMENT` | AD-28. State is declared and verified, never inherited. Credentials escrow under AD-24. |
 | Household router (Google WiFi) and the uplink | `Runbook` | `runbooks/l0-physical/` | Automated: outbound reachability check | `PROC-ADDRESS-PLAN` | Outside the platform's declarative boundary. Recorded so it is not mistaken for unowned. |
-| Wireless bridge (TL-WA3001, client mode) | `Runbook` | `runbooks/l0-physical/` | Automated: link check across the bridge | `PROC-ADDRESS-PLAN` | No management API worth declaring against. |
+| Wireless bridge (TL-WA3001, client-bridge mode) | `Runbook` | `runbooks/l0-physical/` | Automated: link check across the bridge, plus the address-plan checks over its declared management address | `PROC-ADDRESS-PLAN` | **Deployed, and the platform's only uplink** — the rack has no wired path to the household router. Its management address is declared in [`docs/ADDRESS-PLAN.md`](ADDRESS-PLAN.md) as `192.168.86.2`. No management API worth declaring against, so the device is configured by hand; the address it should answer on is still declared rather than discovered. |
 | Data switch (NICGIGA 10-port, unmanaged) | `Runbook` | `runbooks/l0-physical/` | Automated: link-state and negotiated-speed read from each attached host | `PROC-HYPERVISOR-INSTALL` | Unmanaged: the only configuration is which port a cable is in. That is still a configuration item. |
 | Membership switch (Omada ES205G, managed, isolated, no uplink) | `Runbook` | `runbooks/l0-physical/` | Automated: exported running configuration compared against the committed reference export | `PROC-NODE-CLUSTER-FORMATION` | The **managed switch** required by AD-22's total-coverage rule. Human-executed because no controller is in the Stack; the verification is still automated. |
-| Address plan (static assignments, membership segment, DHCP pool boundaries) | `docs/ record` | `docs/ADDRESS-PLAN.md` *(forward reference — story 2.1)* | Automated: declared addresses reconciled against Directory DNS and against what hosts actually answer | `PROC-ADDRESS-PLAN` | Never discovered from running systems. Consumed by Ansible and by DNS; declared in neither. |
+| Address plan (static assignments, membership segment, DHCP pool boundaries) | `docs/ record` | [`docs/ADDRESS-PLAN.md`](ADDRESS-PLAN.md) | Automated, in two halves. **Built:** `pixi run audit` checks the plan against itself — no collision, no static inside the DHCP pool, no Node on one segment only, no consumed reservation, no route on the isolated segment, no address in a range nothing declares. **Owed:** reconciliation of the declared addresses against Directory DNS (story 4.3) and against what hosts actually answer (story 2.3). Neither exists to reconcile against yet, and the gap is in the deferred-work ledger rather than closed by implementing something weaker under the same name | `PROC-ADDRESS-PLAN` | Never discovered from running systems. Consumed by Ansible and by DNS; declared in neither. The internal-consistency half is a real but narrow claim: it says the plan agrees with itself, not that it agrees with the network. |
 
 ## L1 — Hypervisor
 

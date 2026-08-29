@@ -257,7 +257,7 @@ Each names its verification. Execution being manual never excuses verification f
 | --- | --- | --- | --- | --- | --- |
 | `PROC-REPO-SKELETON` | 1.1 | `docs/ record` — the ownership table is maintained, not executed | The ownership audit: fails and names any class with two owners, none, an illegal Owner value, or no covering Procedure | Yes — `docs/OWNERSHIP.md` | No |
 | `PROC-PROCEDURE-INDEX` | 1.2 | `docs/ record` — this file is maintained, not executed | The Index audit: reports every entry missing either half, and every story with no entry | Yes — this file | No |
-| `PROC-ADDRESS-PLAN` | 2.1 | `docs/ record` — addresses are declared, never discovered from running systems | Declared addresses reconciled against Directory DNS and against what hosts actually answer | No | No |
+| `PROC-ADDRESS-PLAN` | 2.1 | `docs/ record` — addresses are declared, never discovered from running systems | Two halves, and only one exists yet: **today**, `pixi run audit` checks the plan's internal consistency — collisions, statics inside the DHCP pool, a Node on one segment only, a consumed reservation, a route on the isolated segment, an address in no declared range. **Owed**, reconciliation of the declared addresses against Directory DNS (story 4.3) and against what hosts actually answer (story 2.3), neither of which exists to reconcile against yet | Yes — [`docs/ADDRESS-PLAN.md`](docs/ADDRESS-PLAN.md) | No |
 | `PROC-OOB-MANAGEMENT` | 2.2 | Firmware-resident; no declarative mechanism is in the Stack | Port probe from another host **plus** a direct firmware-screen reading (AD-28). An OS reinstall is explicitly not evidence | No | No |
 | `PROC-HYPERVISOR-INSTALL` | 2.3 | Initial install to first boot is performed at the console. The architecture's second named manual area | Version, repository set, and cluster-readiness read from the installed host | No | No |
 | `PROC-STORAGE-POOL` | 3.1 | Appliance initial setup — DSM installation, SHR-2 pool creation, and volume creation are performed through the appliance's own first-run wizard, before anything on the network can reach it | Pool health, redundancy level, and volume geometry read from the DSM API | No | **Partly** — see below |
@@ -317,6 +317,16 @@ after the mistake, on a public repository, under time pressure.
 | `PROC-GUEST-PROVISIONING` | Declarative Guest provisioning | `l1-hypervisor` | 2.6 | `runbooks/l1-hypervisor/guest-provisioning.md` | `tofu/l1-hypervisor/guest-provisioning.tf` | `planned` |
 | `PROC-GUEST-SNAPSHOT` | Snapshot and rollback | `l1-hypervisor` | 2.7 | `runbooks/l1-hypervisor/guest-snapshot.md` | `ansible/l1-hypervisor/guest-snapshot.yml` | `planned` |
 | `PROC-NODE-REBUILD` | Node rebuild from the repository | `l1-hypervisor` | 2.8 | `runbooks/l1-hypervisor/node-rebuild.md` | `ansible/l1-hypervisor/node-rebuild.yml` | `planned` |
+
+`PROC-ADDRESS-PLAN` keeps the status `manual-by-decision` now that story 2.1 has written
+[`docs/ADDRESS-PLAN.md`](docs/ADDRESS-PLAN.md), and that is not a story left half-finished. The
+status says what the *Automation* half is, and for a `docs/ record` the answer is permanently "none,
+by decision" — an address plan is read, not run. What changed is tracked where the Index says it is
+tracked: the entry's "Human form written?" cell in
+[Deliberately manual work](#deliberately-manual-work), and the recomputed
+[Totals](#totals) figure that column feeds. Its verification is now half-built rather than absent,
+and the entry says which half and what the other one waits on, because a verification recorded as a
+single sentence would have read as complete the moment the first half landed.
 
 ### Epic 3 — Shared storage, first export
 
@@ -470,7 +480,7 @@ from `epics.md`; a disagreement is a defect, not a rounding.
 | `incomplete` | 0 |
 | `manual-by-decision` | 9 |
 | `planned` | 57 |
-| Human forms written (`manual-by-decision` entries) | 2 |
+| Human forms written (`manual-by-decision` entries) | 3 |
 
 Per layer: `l0-physical` 13 · `l1-hypervisor` 8 · `l2-foundation` 12 · `l3-platform` 13 ·
 `l4-services` 20 · `l5-workloads` 2.
@@ -521,16 +531,22 @@ that builds it. That is the single rule; [`runbooks/TEMPLATE.md`](runbooks/TEMPL
 same one from the writer's side. Registration is not deferred to 13.5 — 13.5 consumes this table, it
 does not populate it.
 
-Story 1.3 built the first three detectors and registered them below; story 1.4 added the fourth. They are the harness's own runs,
+Story 1.3 built the first three detectors and registered them below; story 1.4 added the fourth, and
+story 2.1 the fifth. They are the harness's own runs,
 not any Procedure's check-mode run: the four required by the epics above — one per push-based
 Automation — still do not exist, because no push-based Automation exists. `pixi run drift` is the
 mechanism those four will register through; it reports zero targets today and says so rather than
 reporting a pass over an empty set.
 
+A detector that runs *inside* an already-registered task still gets its own row. The alternative is
+a table that stops growing while the thing it enumerates does not, and 13.5 consumes this table —
+it would wire a source it can see and silently miss one folded into another source's row.
+
 | Source | Registering story | Wired by | Status |
 | --- | --- | --- | --- |
 | `pixi run drift` — scheduled check-mode run over the push-based layers L0–L2. A non-empty diff exits non-zero, as does a run that failed to complete; every run is recorded to `drift-record.json` | 1.3 | 13.5 | Registered, unwired |
 | `pixi run audit` — the Index and ownership audit. Any defect class named exits non-zero | 1.3 | 13.5 | Registered, unwired |
+| `pixi run audit` — the address-plan consistency check over [`docs/ADDRESS-PLAN.md`](docs/ADDRESS-PLAN.md): collisions, statics inside the DHCP pool, a Node on one segment only, a consumed reservation, a route on the isolated segment, an illegal kind, a range that does not tile its segment, an address in no declared range. Runs inside the audit task and exits non-zero on any of them | 2.1 | 13.5 | Registered, unwired |
 | `pixi run converge` — scheduled AD-3 convergence and NFR-3 idempotence run: every Automation run twice, first run for convergence and second for idempotence. A check-mode run that *failed to complete* exits non-zero too, and is never read as a clean run | 1.3 | 13.5 | Registered, unwired |
 | `pixi run secrets` — the plaintext-secret and encryption-policy scan over every tracked file. Runs at commit time through the hook in `.pre-commit-config.yaml` and in the gate through `pixi run ci`; any defect named exits non-zero | 1.4 | 13.5 | Registered, unwired |
 
