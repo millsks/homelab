@@ -63,8 +63,11 @@ and they still carry an automated verification wherever a machine can observe th
 
 ### Forward references
 
-Three declaring mechanisms named below do not exist yet. They are listed so the class has a stated
-home rather than a blank, and each is marked *(forward reference — story N)* in the table. They are
+Two declaring mechanisms named below do not exist yet. They are listed so the class has a stated
+home rather than a blank, and each is marked *(forward reference — story N)* in the table. There
+were three until story 1.4 built `.sops.yaml`; its row is gone from this table rather than kept and
+annotated, because a forward-reference list that retains resolved entries stops being a list of
+what is missing. They are
 deliberately not stubbed: writing a placeholder before the owning story defines the format produces
 a file that story then has to undo.
 
@@ -75,7 +78,6 @@ the platform requires, so a path owed by nobody is a Procedure nobody committed 
 
 | Path | Owed by |
 | --- | --- |
-| `.sops.yaml` | Story 1.4 — encrypted secrets |
 | `docs/ESCROW.md` | Story 14.2 — escrow completeness |
 | `docs/ADDRESS-PLAN.md` | Story 2.1 — address plan and interface allocation |
 
@@ -198,8 +200,8 @@ share a Node" is therefore *stated* by the layer that cares about it and *declar
 | --- | --- | --- | --- | --- | --- |
 | **Control node**: the machine that runs `ansible-playbook` and `tofu apply`, holding the bootstrap key, the provisioning-state credentials, and the SOPS decryption key | `Runbook` | `runbooks/l0-physical/` | Automated: a rebuild-from-Runbook check that the rebuilt node can decrypt, plan, and reach every managed host | `PROC-CONVERGENCE-HARNESS` | **Escrow-relevant under AD-24.** Whatever this machine holds that exists nowhere else is an escrow entry, and AD-24 forbids recovery depending on any single un-escrowed machine — a control node that is the only holder of the decryption key fails that rule outright. Recorded here so the machine that runs the automation is not the one thing the ownership table forgets. |
 | Git remote: hosting location, access control, branch protection, and who may push | `Runbook` | `runbooks/l0-physical/` | Automated: a clone from a second machine, plus a probe that a direct push to the default branch is refused | `PROC-REPO-SKELETON` | The Repository *is* the desired state (AD-4), so the thing that hosts it is a configuration item. Human-executed through the hosting provider; no declarative mechanism is in the Stack. |
-| Convergence tooling: the CI gate, its tasks, the harness that implements it, its tests, linter configuration, and dependency pins | `Repository tooling` | `pixi.toml`, `pyproject.toml`, `.yamllint`, `.gitignore`, `src/asgard_harness/`, `tests/`, `.github/workflows/` | Automated: `pixi run ci` exits 0, and each guarded task reports whether it ran or skipped rather than silently passing | `PROC-CONVERGENCE-HARNESS` | The harness that grades every other row has to be owned too. Task guards use an explicit `if`, never a short-circuit chain ending in an echo, because that shape reports success on real failure — and, one layer down, a check-mode run's exit code is read before its output, because a tool that *failed* reports no changes for the same reason a converged one does. The gate itself declares no credential and reaches no managed system; the runs that do (`drift`, `converge`) are scheduled, never in the merge path. |
-| Repository-stored secret material (encryption at rest) | `SOPS + age` | `.sops.yaml` *(forward reference — story 1.4)* | Automated: a commit-time check that rejects plaintext and names the offending path | `PROC-REPO-SECRETS` | The decrypting key is itself an escrow entry (AD-24) and is held by the control node above. |
+| Convergence tooling: the CI gate, its tasks, the harness that implements it, its tests, linter configuration, commit-time hooks, and dependency pins | `Repository tooling` | `pixi.toml`, `pyproject.toml`, `.yamllint`, `.gitignore`, `.pre-commit-config.yaml`, `src/asgard_harness/`, `tests/`, `.github/workflows/` | Automated: `pixi run ci` exits 0, and each guarded task reports whether it ran or skipped rather than silently passing | `PROC-CONVERGENCE-HARNESS` | The harness that grades every other row has to be owned too. Task guards use an explicit `if`, never a short-circuit chain ending in an echo, because that shape reports success on real failure — and, one layer down, a check-mode run's exit code is read before its output, because a tool that *failed* reports no changes for the same reason a converged one does. The gate itself declares no credential and reaches no managed system; the runs that do (`drift`, `converge`) are scheduled, never in the merge path. |
+| Repository-stored secret material (encryption at rest) | `SOPS + age` | [`.sops.yaml`](../.sops.yaml) | Automated: `pixi run secrets` — a check that rejects plaintext and names the offending path, and that fails on any path the policy covers which is not encrypted. It runs at commit time through `.pre-commit-config.yaml` **and** in the gate, because a hook lives in `.git/hooks` and no clone carries one | `PROC-REPO-SECRETS` | The decrypting key is itself an escrow entry (AD-24). It is **not** held by the control node alone — that would fail AD-24 outright; the holders are enumerated in [`runbooks/l0-physical/repo-secrets.md`](../runbooks/l0-physical/repo-secrets.md) § Escrow. |
 | Escrow register (what is held outside Asgard, where, and how it rotates) | `docs/ record` | `docs/ESCROW.md` *(forward reference — story 14.2)* | Manual review on a stated cadence; the list is itself the artefact under review | `PROC-ESCROW-REGISTER` | AD-24: an exhaustive enumerated list, not a set of examples. |
 | Procedure enumeration (which Procedures the platform requires, their layer, owning story, and whether both halves are present) | `docs/ record` | [`PROCEDURE-INDEX.md`](../PROCEDURE-INDEX.md) | Automated: the convergence harness reports Index entries missing either half, and stories with no entry | `PROC-PROCEDURE-INDEX` | The Index enumerates what the platform **requires**, one Procedure per story, not what it happens to have built — so most entries are `planned` and that is the honest reading. Story 1.2 defined it; story 1.3 builds the audit. |
 | This ownership table | `docs/ record` | `docs/OWNERSHIP.md` | Automated: an audit that fails and **names the class** on any class with two owners or none | `PROC-REPO-SKELETON` | See Audit below. |

@@ -286,7 +286,7 @@ closing the spike. It is not closed.
 | `PROC-REPO-SKELETON` | Repository skeleton with layered ownership | `l0-physical` | 1.1 | `docs/OWNERSHIP.md` | none — by decision | `manual-by-decision` |
 | `PROC-PROCEDURE-INDEX` | Procedure Index and the dual-form contract | `l0-physical` | 1.2 | `PROCEDURE-INDEX.md` | none — by decision | `manual-by-decision` |
 | `PROC-CONVERGENCE-HARNESS` | Convergence test harness | `l0-physical` | 1.3 | `runbooks/l0-physical/convergence-harness.md` | `pixi.toml` | `complete` |
-| `PROC-REPO-SECRETS` | Encrypted secrets before a secret store exists | `l0-physical` | 1.4 | `runbooks/l0-physical/repo-secrets.md` | `.sops.yaml` | `planned` |
+| `PROC-REPO-SECRETS` | Encrypted secrets before a secret store exists | `l0-physical` | 1.4 | `runbooks/l0-physical/repo-secrets.md` | `.sops.yaml` | `complete` |
 
 `PROC-CONVERGENCE-HARNESS` was recorded here as `incomplete` — `pixi.toml` existed and already ran
 the gate, while its Runbook did not. That was exactly one half present, which is the
@@ -295,6 +295,14 @@ an Index that softened its own first defect would have no standing to report any
 1.3 closed it by writing [`runbooks/l0-physical/convergence-harness.md`](runbooks/l0-physical/convergence-harness.md)
 and adding the back-reference comment to `pixi.toml`. It is the Index's first `complete` entry, and
 the audit that reports the defect is the same audit that now agrees the defect is gone.
+
+`PROC-REPO-SECRETS` is the second. It went from `planned` to `complete` in one change rather than
+passing through `incomplete`, because both halves had to land together: a policy declaring which
+paths are encrypted is worthless without the check that enforces it, and the check has nothing to
+enforce without the policy. It is `complete` while protecting nothing — no credential exists yet —
+and that is the point of the story rather than a weakness in it. A plaintext secret survives its
+own deletion, so the mechanism has to predate the first secret; the alternative is building it
+after the mistake, on a public repository, under time pressure.
 
 ### Epic 2 — Nodes, cluster, network, and break-glass
 
@@ -458,18 +466,18 @@ from `epics.md`; a disagreement is a defect, not a rounding.
 | Stories in [`epics.md`](_bmad-output/planning-artifacts/epics.md) at `f5471f8` | 67 |
 | Entries in this Index | 68 |
 | Stories carrying two entries under the two-owner exception | 1 |
-| `complete` | 1 |
+| `complete` | 2 |
 | `incomplete` | 0 |
 | `manual-by-decision` | 9 |
-| `planned` | 58 |
+| `planned` | 57 |
 | Human forms written (`manual-by-decision` entries) | 2 |
 
 Per layer: `l0-physical` 13 · `l1-hypervisor` 8 · `l2-foundation` 12 · `l3-platform` 13 ·
 `l4-services` 20 · `l5-workloads` 2.
 
-One `complete` entry is the accurate reading of a platform whose first Procedure against hardware
-has not yet been executed: the sole `complete` entry is `PROC-CONVERGENCE-HARNESS`, which runs on
-the control node and touches no managed system. The `planned` entries are the denominator FR-1 was
+Two `complete` entries are the accurate reading of a platform whose first Procedure against
+hardware has not yet been executed: both — `PROC-CONVERGENCE-HARNESS` and `PROC-REPO-SECRETS` — run
+on the control node and touch no managed system. The `planned` entries are the denominator FR-1 was
 missing.
 
 Every figure above is recomputed by `pixi run audit` from the entry tables and from `epics.md`;
@@ -513,7 +521,7 @@ that builds it. That is the single rule; [`runbooks/TEMPLATE.md`](runbooks/TEMPL
 same one from the writer's side. Registration is not deferred to 13.5 — 13.5 consumes this table, it
 does not populate it.
 
-Story 1.3 built the first three detectors and registered them below. They are the harness's own runs,
+Story 1.3 built the first three detectors and registered them below; story 1.4 added the fourth. They are the harness's own runs,
 not any Procedure's check-mode run: the four required by the epics above — one per push-based
 Automation — still do not exist, because no push-based Automation exists. `pixi run drift` is the
 mechanism those four will register through; it reports zero targets today and says so rather than
@@ -524,6 +532,7 @@ reporting a pass over an empty set.
 | `pixi run drift` — scheduled check-mode run over the push-based layers L0–L2. A non-empty diff exits non-zero, as does a run that failed to complete; every run is recorded to `drift-record.json` | 1.3 | 13.5 | Registered, unwired |
 | `pixi run audit` — the Index and ownership audit. Any defect class named exits non-zero | 1.3 | 13.5 | Registered, unwired |
 | `pixi run converge` — scheduled AD-3 convergence and NFR-3 idempotence run: every Automation run twice, first run for convergence and second for idempotence. A check-mode run that *failed to complete* exits non-zero too, and is never read as a clean run | 1.3 | 13.5 | Registered, unwired |
+| `pixi run secrets` — the plaintext-secret and encryption-policy scan over every tracked file. Runs at commit time through the hook in `.pre-commit-config.yaml` and in the gate through `pixi run ci`; any defect named exits non-zero | 1.4 | 13.5 | Registered, unwired |
 
 ---
 

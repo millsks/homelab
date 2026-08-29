@@ -29,6 +29,17 @@ drift-record.json
 converge-record.json
 *-record.json
 
+# age identities: the half that DECRYPTS everything .sops.yaml encrypts. It is escrowed outside
+# this Repository (runbooks/l0-physical/repo-secrets.md § Escrow) and belongs in no clone of it.
+# Ignoring is a backstop, never the control — `pixi run secrets` rejects the key by its own
+# AGE-SECRET-KEY-1 format wherever it is put, because .gitignore only helps for the names it
+# happens to predict. NOT `.sops.yaml`, which is the public policy and must be COMMITTED.
+*.agekey
+*.age.key
+age-key.txt
+keys.txt
+sops-age-key*
+
 # OpenTofu working directories, created by `tofu init` in any root module that
 # has .tf files. NOT .terraform.lock.hcl — that file records the exact provider
 # versions resolved, AD-20 requires exact pins, and it must be COMMITTED.

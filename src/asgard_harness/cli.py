@@ -15,12 +15,13 @@ from typing import Any
 
 import structlog
 
-from asgard_harness.audit import run_audit, run_convergence, run_drift
+from asgard_harness.audit import run_audit, run_convergence, run_drift, run_secrets
+from asgard_harness.commit_message import validate_file
 from asgard_harness.findings import AuditReport
 from asgard_harness.selfcheck import run_self_check
 from asgard_harness.workspace import Workspace
 
-COMMANDS = ("audit", "selfcheck", "drift", "converge", "all")
+COMMANDS = ("audit", "selfcheck", "secrets", "drift", "converge", "commit-msg", "all")
 
 GATE_COMMANDS = ("audit", "selfcheck")
 """What `all` runs: the pure readers only.
@@ -28,6 +29,11 @@ GATE_COMMANDS = ("audit", "selfcheck")
 `drift` and `converge` shell out to real tools against managed systems, so they are scheduled
 rather than folded into a default run. `all` is what a developer types; it must never reach
 production because someone forgot which subcommand was which.
+
+`secrets` is absent for the opposite reason: it is not omitted, it is already *inside* `audit`, so
+listing it here would run the same scan twice in one report. `pixi run secrets` exists as its own
+task because the commit hook needs the scan without the document audit, and because the gate chain
+should name the check rather than have it hide inside another one.
 """
 
 
@@ -84,6 +90,32 @@ def record(report: AuditReport, command: str, destination: Path) -> None:
     destination.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def check_commit_message(paths: Sequence[Path]) -> int:
+    """Validate the commit message git wrote, for the `commit-msg` hook.
+
+    Args:
+        paths: What git passed the hook. Exactly one message file is expected.
+
+    Returns:
+        `0` when the message is a conventional commit, `1` when it is not — including when git
+        passed nothing, because a hook with no message to judge has judged nothing.
+    """
+    log = structlog.get_logger("asgard_harness")
+    if len(paths) != 1:
+        log.error(
+            "commit message rejected",
+            command="commit-msg",
+            reason=f"expected exactly one commit message file, got {[str(path) for path in paths]}",
+        )
+        return 1
+    verdict = validate_file(paths[0])
+    if verdict.ok:
+        log.info("commit message accepted", command="commit-msg", subject=verdict.subject)
+        return 0
+    log.error("commit message rejected", command="commit-msg", subject=verdict.subject, reason=verdict.reason)
+    return 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser.
 
@@ -95,6 +127,12 @@ def build_parser() -> argparse.ArgumentParser:
         description="Make the repository's own definitions executable, and prove the checks can fail.",
     )
     parser.add_argument("command", choices=COMMANDS, nargs="?", default="all", help="what to run")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        type=Path,
+        help="for commit-msg, the message file git supplies; unused by every other command",
+    )
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="repository root to audit")
     parser.add_argument("--json", action="store_true", help="emit machine-readable output")
     parser.add_argument("--record", type=Path, default=None, help="write a JSON record of the run to this path")
@@ -114,11 +152,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     configure_logging(as_json=bool(args.json))
     workspace = Workspace(root=Path(args.root).resolve())
 
+    if args.command == "commit-msg":
+        return check_commit_message(args.paths)
+
     runners = {
         "audit": run_audit,
         "drift": run_drift,
         "converge": run_convergence,
         "selfcheck": run_self_check,
+        "secrets": run_secrets,
     }
     commands = list(GATE_COMMANDS) if args.command == "all" else [args.command]
 

@@ -68,6 +68,17 @@ CHECK_MODE_DIFF_NOT_EMPTY: Final = "check-mode-diff-not-empty"
 AUTOMATION_CHECK_FAILED: Final = "automation-check-run-failed"
 AUTOMATION_NO_CHECK_MODE: Final = "automation-has-no-known-check-mode"
 
+# --- Repository-stored secret material (AD-15, AD-24) --------------------------------------------
+#
+# The ownership row for "Repository-stored secret material" names its verification as "a commit-time
+# check that rejects plaintext and names the offending path". These are the classes that check
+# reports. It runs in the gate as well as at commit time: a pre-commit hook lives in `.git/hooks`,
+# which no clone carries, so a rule enforced only there is a rule a fresh clone does not have.
+
+PLAINTEXT_SECRET: Final = "plaintext-secret-in-repository"
+UNENCRYPTED_DECLARED_PATH: Final = "declared-encrypted-path-in-plaintext"
+UNDECLARED_ENCRYPTION_POLICY: Final = "encryption-policy-undeclared"
+
 # --- Layer discipline (the design's single enforceable claim) ------------------------------------
 
 UPWARD_LAYER_DEPENDENCY: Final = "upward-layer-dependency"

@@ -1,0 +1,89 @@
+---
+# Procedure: PROC-REPO-SECRETS — runbook: runbooks/l0-physical/repo-secrets.md
+#
+# The commit-time half of the plaintext-secret rule. It is NOT the only half: a hook lives in
+# .git/hooks, which no clone carries and which nobody is obliged to install, so the same scan runs
+# in the gate through `pixi run secrets` and again inside `pixi run audit`. A rule enforced only by
+# a hook is a rule a fresh clone does not have.
+#
+# WHY EVERY HOOK IS `repo: local`
+# -------------------------------
+# A remote hook repository is a second toolchain: pre-commit resolves it from the network into an
+# environment of its own at `--install-hooks` time, pinned by a `rev` this Repository's pixi.lock
+# knows nothing about. The deferred-work ledger recorded that trade-off as story 1.4's to weigh.
+# Weighed: every hook below shells out through `pixi run`, so a commit runs exactly the tools
+# `pixi.lock` resolved and nothing else, `pixi run bootstrap` needs no network, and there is one
+# place — pixi.toml — where a tool version changes. The cost is that the conventional-commit check
+# is ours to maintain; it is thirty lines, in src/asgard_harness/commit_message.py, with tests.
+#
+# WHY THE MANIFEST PATH IS PINNED, AND WHY THAT IS NOT THE REAL DEFENCE
+# ---------------------------------------------------------------------
+# `pixi run <name>` runs the task called <name> if the manifest it loads declares one, and
+# OTHERWISE RUNS <name> AS A SHELL COMMAND. A hook whose task cannot be resolved therefore exits
+# 127 with `<name>: command not found`, and pre-commit renders that identically to the scan finding
+# a credential: `Failed`, exit 1, commit rejected. Every commit is blocked and nothing is checked —
+# and the rejection looks exactly like the check working. This shipped, and was caught by someone
+# committing a file containing the word "probe" and being told no.
+#
+# `--manifest-path` removes one way that resolution can go wrong: an ambient PIXI_* environment
+# variable or an enclosing manifest pointing pixi somewhere else. It is not the real defence,
+# because it only closes the cause that was guessed at. The real defence is that CI now runs these
+# hooks in BOTH directions — `test_the_secret_hook_passes_on_the_clean_repository` fails on exit
+# 127 whatever caused it, and `test_every_hook_entry_names_a_task_pixi_actually_declares` catches a
+# renamed or missing task statically, with no pixi involved at all.
+#
+# WHY `pass_filenames: false`
+# ---------------------------
+# pre-commit stashes unstaged changes before running, so during a hook the working tree *is* the
+# staged tree. Running the whole-tree task therefore checks exactly what is about to be committed,
+# and it checks it with the same command the gate runs rather than a file-list variant that could
+# drift from it. It also catches a secret sitting in a file this commit does not touch, which a
+# filename-driven hook would walk straight past.
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  - repo: local
+    hooks:
+      - id: asgard-secret-scan
+        name: reject plaintext secret material
+        description: >-
+          Rejects a commit carrying a plaintext credential, or a file the committed .sops.yaml
+          policy covers that is not encrypted, and names the offending path.
+        entry: pixi run --manifest-path pixi.toml secrets
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: asgard-format
+        name: ruff format and tofu fmt
+        entry: pixi run --manifest-path pixi.toml fmt
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: asgard-lint-python
+        name: ruff check
+        entry: pixi run --manifest-path pixi.toml lint-py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: asgard-lint-yaml
+        name: yamllint --strict
+        entry: pixi run --manifest-path pixi.toml lint-yaml
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: asgard-conventional-commit
+        name: conventional commit message
+        description: >-
+          Rejects a commit message that is not of the form "type(scope): description", which is
+          what git-cliff parses to build the changelog.
+        entry: pixi run --manifest-path pixi.toml commit-msg
+        language: system
+        stages: [commit-msg]

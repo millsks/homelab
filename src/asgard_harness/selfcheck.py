@@ -45,6 +45,8 @@ COPIED_PATHS: tuple[str, ...] = (
     "pyproject.toml",
     ".yamllint",
     ".gitignore",
+    ".sops.yaml",
+    ".pre-commit-config.yaml",
     "docs",
     "runbooks",
     "ansible",
@@ -79,8 +81,30 @@ _OWNER_COLUMN = 1
 _OWNERSHIP_VERIFICATION_COLUMN = 3
 _OWNERSHIP_PROCEDURE_COLUMN = 4
 
-SUBJECT_KEY = "PROC-REPO-SECRETS"
-"""The entry fixtures mutate. Story 1.4 is unstarted, so neither half exists and the row is inert."""
+SUBJECT_KEY = "PROC-REBUILD-DRILL"
+"""The entry the Index fixtures mutate, and the three values derived from it.
+
+**The subject must be INERT: `planned`, with neither half on disk, and the only entry its story
+carries.** Every Index fixture depends on all three. The incomplete-Procedure fixture makes exactly
+one half exist, which proves nothing if a half already existed; the status fixture claims
+`complete` over an empty entry; the story-coverage fixture deletes the row and expects the story to
+be left with none.
+
+Landing the owning story therefore breaks the fixtures, silently in the sense that the failure
+names a defect class rather than the real cause. This module was pointed at `PROC-REPO-SECRETS`
+until story 1.4 built it, which is what re-pointed it here. `PROC-REBUILD-DRILL` is story 18.2 —
+the last story of the last epic — so the trap is as far away as the plan allows, and
+`test_the_selfcheck_subject_entry_is_still_inert` fails with that sentence rather than leaving the
+next author to infer it from twelve red fixtures.
+"""
+
+SUBJECT_RUNBOOK = "runbooks/l1-hypervisor/rebuild-drill.md"
+"""The subject entry's Runbook path, as the Index writes it. Fixtures that write or duplicate a
+Runbook path derive theirs from this, so re-pointing is two lines rather than a search."""
+
+SUBJECT_TWIN_KEY = f"{SUBJECT_KEY}-TWIN"
+SUBJECT_EXTRA_KEY = f"{SUBJECT_KEY}-EXTRA"
+SUBJECT_EXTRA_RUNBOOK = SUBJECT_RUNBOOK.replace(".md", "-extra.md")
 
 
 class FixtureError(RuntimeError):
@@ -286,7 +310,7 @@ def _duplicate_runbook_path(workspace: Workspace) -> None:
     duplicate_row(
         workspace.index_path,
         SUBJECT_KEY,
-        {0: "`PROC-REPO-SECRETS-TWIN`"},
+        {0: f"`{SUBJECT_TWIN_KEY}`"},
         anchor=ENTRY_ANCHOR,
     )
 
@@ -312,8 +336,8 @@ def _story_over_allowance(workspace: Workspace) -> None:
         workspace.index_path,
         SUBJECT_KEY,
         {
-            0: "`PROC-REPO-SECRETS-EXTRA`",
-            4: "`runbooks/l0-physical/repo-secrets-extra.md`",
+            0: f"`{SUBJECT_EXTRA_KEY}`",
+            4: f"`{SUBJECT_EXTRA_RUNBOOK}`",
         },
         anchor=ENTRY_ANCHOR,
     )
@@ -327,10 +351,10 @@ def _stale_provenance(workspace: Workspace) -> None:
 
 
 def _broken_back_reference(workspace: Workspace) -> None:
-    target = workspace.runbooks_dir / "l0-physical" / "repo-secrets.md"
+    target = workspace.root / SUBJECT_RUNBOOK
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        "---\nprocedure_key: PROC-REPO-SECRETS\nprocedure_automation: ansible/l0-physical/wrong.yml\n---\n",
+        f"---\nprocedure_key: {SUBJECT_KEY}\nprocedure_automation: ansible/l0-physical/wrong.yml\n---\n",
         encoding="utf-8",
     )
 
@@ -382,6 +406,34 @@ def _uncovered_ownership_class(workspace: Workspace) -> None:
     set_cell(workspace.ownership_path, "This ownership table", _OWNERSHIP_PROCEDURE_COLUMN, "`PROC-DOES-NOT-EXIST`")
 
 
+# The armour line is assembled rather than written out, because the secret scan walks `src/` and a
+# module containing a real private-key header would fail the very check it exists to prove. Any
+# fixture for this detector has that shape: the known-bad state cannot be a literal in the tree
+# being scanned.
+_ARMOURED_KEY = "-----BEGIN OPENSSH " + "PRIVATE KEY-----"
+
+
+def _plaintext_secret(workspace: Workspace) -> None:
+    target = workspace.root / "docs" / "leaked-credential.txt"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        f"{_ARMOURED_KEY}\nb3BlbnNzaC1rZXktdjEAAAAA\n-----END OPENSSH PRIVATE KEY-----\n", encoding="utf-8"
+    )
+
+
+def _unencrypted_declared_path(workspace: Workspace) -> None:
+    target = workspace.root / "ansible" / "l2-foundation" / "directory-bind.sops.yaml"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    # Deliberately innocuous content: what makes this a defect is the NAME, which the committed
+    # policy says is encrypted, not anything in the body. A fixture that also carried a credential
+    # would fire two detectors and prove neither cleanly.
+    target.write_text("---\nbind_dn: uid=svc,cn=users\n", encoding="utf-8")
+
+
+def _undeclared_encryption_policy(workspace: Workspace) -> None:
+    (workspace.root / ".sops.yaml").write_text("---\ncreation_rules: []\n", encoding="utf-8")
+
+
 FIXTURES: tuple[Fixture, ...] = (
     Fixture("an entry's status is outside the closed set", defects.ILLEGAL_STATUS_VALUE, _illegal_status),
     Fixture("an entry has exactly one half on disk", defects.INCOMPLETE_PROCEDURE, _incomplete_procedure),
@@ -428,6 +480,17 @@ FIXTURES: tuple[Fixture, ...] = (
         _missing_ownership_verification,
     ),
     Fixture("a resource class names no real Procedure", defects.UNCOVERED_OWNERSHIP_CLASS, _uncovered_ownership_class),
+    Fixture("a plaintext credential reaches the tree", defects.PLAINTEXT_SECRET, _plaintext_secret),
+    Fixture(
+        "a path the policy covers is committed unencrypted",
+        defects.UNENCRYPTED_DECLARED_PATH,
+        _unencrypted_declared_path,
+    ),
+    Fixture(
+        "the encryption policy stops declaring anything",
+        defects.UNDECLARED_ENCRYPTION_POLICY,
+        _undeclared_encryption_policy,
+    ),
 )
 
 
