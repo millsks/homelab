@@ -103,10 +103,35 @@ The CI gate is the definition of done:
 
 ```sh
 pixi install --locked
-pixi run ci     # lint, check, tofu-validate, then the convergence harness
+pixi run bootstrap   # install the commit-time hooks; safe to run, and safe to skip
+pixi run ci          # secrets, lint, check, tofu-validate, then the convergence harness
 ```
 
-Individual steps: `pixi run lint`, `pixi run fmt`, `pixi run check`, `pixi run tofu-validate`.
+Individual steps: `pixi run secrets`, `pixi run lint`, `pixi run fmt`, `pixi run check`,
+`pixi run tofu-validate`.
+
+`bootstrap` is optional by design. Its hooks reject a plaintext secret and a non-conventional commit
+message *before* a commit exists, which is the earliest and cheapest place to catch either — but a
+hook lives in `.git/hooks`, which no clone carries, so nothing is enforced only there. Every hook
+shells out through `pixi run`, so a commit runs exactly the tools `pixi.lock` resolved and
+`--install-hooks` needs no network.
+
+### Secret handling
+
+This repository is public and holds the desired state of the whole platform, so nothing in it may
+carry a plaintext credential — and a secret in git history survives its own deletion. Encryption at
+rest is declarative: [`.sops.yaml`](.sops.yaml) says which paths are encrypted and to which
+recipients, `pixi run secrets` rejects a plaintext credential and names the offending path, and it
+fails on any path the policy covers that is not encrypted. The decrypting key is escrowed outside
+this repository and outside any single machine.
+
+```sh
+pixi run secrets   # the same scan the commit hook and the gate both run
+```
+
+The Procedure it implements is [`PROC-REPO-SECRETS`](runbooks/l0-physical/repo-secrets.md), which is
+also where the escrow record lives. The *runtime* secret store — delivering secrets to running
+workloads — is a much later story and is not this.
 
 ### The convergence harness
 
@@ -120,6 +145,7 @@ pixi run cov         # full suite with the coverage gate
 pixi run audit       # every detector against this repository; names each defect it finds
 pixi run selfcheck   # injects a known-bad fixture per defect class and proves the audit fails
 pixi run drift       # AD-23's check-mode run over the push-based layers; records the result
+pixi run secrets     # the plaintext-secret and encryption-policy scan, on its own
 ```
 
 `pixi run selfcheck` is the part worth understanding. A gate that cannot fail is worse than no gate,

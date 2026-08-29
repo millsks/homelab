@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-28-2026 21:45
-last_updated: 08-29-2026 14:00
+last_updated: 08-29-2026 14:25
 project: Project Asgard
 project_key: NOKEY
 tracking_system: file-system
@@ -39,7 +39,7 @@ development_status:
   1-1-repository-skeleton-with-layered-ownership: done
   1-2-procedure-index-and-the-dual-form-contract: done
   1-3-convergence-test-harness: review
-  1-4-encrypted-secrets-before-a-secret-store-exists: backlog
+  1-4-encrypted-secrets-before-a-secret-store-exists: in-progress
   epic-1-retrospective: optional
 
   epic-2: backlog

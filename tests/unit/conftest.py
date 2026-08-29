@@ -106,6 +106,19 @@ MINI_OWNERSHIP = """# Declarative Ownership
 | Component version pins | `Delegated` | co-located | Automated: pin comparison | `Delegated` — whatever covers the pinned class | |
 """
 
+MINI_SOPS = """---
+# Procedure: PROC-MINI — runbook: runbooks/l0-physical/mini.md
+creation_rules:
+  - path_regex: (^|/)[^/]+\\.sops\\.ya?ml$
+    age: age1miniexamplerecipient
+"""
+"""The miniature encryption policy.
+
+The mini repository needs one because `run_audit` enforces the policy's presence: a workspace with
+no `.sops.yaml` is a defect, which is the whole point of that detector, and a baseline that trips it
+would make every other unit test fail for an unrelated reason.
+"""
+
 MINI_EPICS = """# Mini epics
 
 ### Story 1.1: One
@@ -165,6 +178,7 @@ def build_mini_repo(root: Path) -> Workspace:
     (root / "runbooks" / "l1-hypervisor").mkdir(parents=True, exist_ok=True)
     (root / "ansible" / "l0-physical").mkdir(parents=True, exist_ok=True)
     (root / "PROCEDURE-INDEX.md").write_text(MINI_INDEX, encoding="utf-8")
+    (root / ".sops.yaml").write_text(MINI_SOPS, encoding="utf-8")
     (root / "docs" / "OWNERSHIP.md").write_text(MINI_OWNERSHIP, encoding="utf-8")
     (root / "docs" / "MANUAL.md").write_text("# Manual record\n", encoding="utf-8")
     (root / "_bmad-output" / "planning-artifacts" / "epics.md").write_text(MINI_EPICS, encoding="utf-8")

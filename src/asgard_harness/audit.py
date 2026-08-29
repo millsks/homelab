@@ -16,11 +16,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from asgard_harness import checks_crossdoc, checks_index, checks_ownership, convergence
+from asgard_harness import checks_crossdoc, checks_index, checks_ownership, checks_secrets, convergence
 from asgard_harness.epics import load_stories
 from asgard_harness.findings import AuditReport, CheckResult, report_of
 from asgard_harness.index_document import load_index
 from asgard_harness.ownership_document import load_ownership
+from asgard_harness.secrets_policy import POLICY_FILENAME, load_policy
 from asgard_harness.workspace import Workspace
 
 CommitResolver = Callable[[Workspace], str | None]
@@ -73,9 +74,29 @@ def run_audit(workspace: Workspace, *, resolve_commit: CommitResolver | None = N
         checks_ownership.check_verification_present(ownership),
         checks_ownership.check_procedure_coverage(ownership, index),
         checks_ownership.unowned_defect_status(ownership),
+        *checks_secrets.run_secret_checks(workspace, load_policy(workspace.root / POLICY_FILENAME)),
         checks_index.check_totals(index, stories, workspace),
     ]
     return report_of(results)
+
+
+def run_secrets(workspace: Workspace) -> AuditReport:
+    """Run only the secret-handling checks.
+
+    This is what the commit-time hook runs, and it is deliberately the *same code* the gate runs
+    inside `run_audit` rather than a second implementation that could drift from it. The hook needs
+    it alone because a commit must not wait on the document audit, and because a Repository can be
+    perfectly documented and still be carrying a credential.
+
+    Reads only. Safe for the merge gate and for a commit hook.
+
+    Args:
+        workspace: The repository under audit.
+
+    Returns:
+        The assembled report.
+    """
+    return report_of(checks_secrets.run_secret_checks(workspace, load_policy(workspace.root / POLICY_FILENAME)))
 
 
 def run_drift(workspace: Workspace) -> AuditReport:

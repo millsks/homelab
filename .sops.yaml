@@ -1,0 +1,43 @@
+---
+# Procedure: PROC-REPO-SECRETS — runbook: runbooks/l0-physical/repo-secrets.md
+#
+# The Automation half of PROC-REPO-SECRETS, and the declaring mechanism `docs/OWNERSHIP.md` names
+# for the "Repository-stored secret material" class. Tool configuration has no free-form metadata
+# mechanism, so the comment above is the back-reference the dual-form contract requires — see
+# "The dual-form contract" in PROCEDURE-INDEX.md. The audit reads it; do not reword it.
+#
+# WHY THIS FILE EXISTS AT ALL, WITH NOTHING YET TO ENCRYPT
+# --------------------------------------------------------
+# A plaintext secret survives its own deletion. Rewriting the history of a public repository that
+# others may already have cloned is not a remedy, so the mechanism has to exist before the first
+# credential does — not after the first mistake.
+#
+# WHICH PATHS
+# -----------
+# One convention, deliberately narrow: a file is encrypted when its name says so. Anything named
+# `<something>.sops.yaml`, `.sops.yml`, `.sops.json`, or `.sops.env`, anywhere in the tree, is
+# covered. The rule is a naming convention rather than a directory because secret material lives
+# beside the declaration that consumes it — an Ansible group_vars file, a Kubernetes overlay — and a
+# `secrets/` directory would pull it away from its declaration and make the pairing a thing to
+# remember. `pixi run secrets` fails and names the path if a file matching this rule is not
+# encrypted, so the rule is enforced rather than merely written down.
+#
+# This file itself does not match: `[^/]+` requires a name part before `.sops.yaml`, and the policy
+# is not secret material. Widening these rules beyond what the platform actually needs is a human
+# decision, not a convenience — see the Scope section of the Runbook.
+#
+# WHICH RECIPIENTS
+# ----------------
+# `AGE-RECIPIENT-UNSET` is a sentinel, on the same principle as `TEMPLATE-UNFILLED` in
+# runbooks/TEMPLATE.md: grep-visible and structurally invalid, so it can never be mistaken for a
+# real key. It is here because no age key exists yet, and generating one at authoring time would
+# have put the only copy of its private half on one machine — the exact escrow failure AD-24 names
+# ("a key held only on the operator's workstation fails this").
+#
+# Step 1 of the Runbook generates the key, escrows it to the holders that Runbook enumerates, and
+# replaces this line with the public half. Until then nothing in the Repository is encrypted and
+# nothing needs to be; the harness reports the sentinel as a defect the moment any file matching a
+# rule above appears, so the sentinel cannot outlive the first real secret.
+creation_rules:
+  - path_regex: (^|/)[^/]+\.sops\.(ya?ml|json|env)$
+    age: AGE-RECIPIENT-UNSET
