@@ -1,0 +1,57 @@
+# Python tool configuration only. Package and environment management live in
+# pixi.toml; this file never declares dependencies.
+#
+# This repository is infrastructure-as-code, not a Python package: there is no
+# [project] table and no src layout. Ruff and mypy exist here for the helper
+# scripts and Ansible filter plugins that will accumulate, and to keep any
+# Python that does land held to the same standard as everywhere else.
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+extend-exclude = [
+    ".pixi",
+    "_bmad",          # vendored BMAD tooling - upstream's code, not ours to lint
+    ".claude",        # vendored agent skills - same
+    ".agents",        # vendored agent definitions - same
+    ".bmad-loop",
+    "_bmad-output",   # generated planning artifacts
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "RUF", "D"]
+ignore = ["E501"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+exclude = "^(\\.pixi|_bmad|\\.claude|\\.agents|\\.bmad-loop|_bmad-output)/"
+
+[tool.git-cliff.changelog]
+header = "# Changelog\n\n"
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}]({{ commit.id }}))
+{% endfor %}
+{% endfor %}
+"""
+trim = true
+
+[tool.git-cliff.git]
+conventional_commits = true
+filter_unconventional = true
+commit_parsers = [
+    { message = "^feat", group = "Features" },
+    { message = "^fix", group = "Bug Fixes" },
+    { message = "^docs", group = "Documentation" },
+    { message = "^perf", group = "Performance" },
+    { message = "^refactor", group = "Refactoring" },
+    { message = "^chore", skip = true },
+]

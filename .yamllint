@@ -1,0 +1,23 @@
+extends: default
+
+rules:
+  # Prose-bearing YAML in this repo (sprint tracking, Ansible with explanatory
+  # comments) carries long explanatory lines on purpose. Readability of the
+  # comment beats an arbitrary column limit.
+  line-length:
+    max: 160
+    allow-non-breakable-words: true
+  comments:
+    min-spaces-from-content: 1
+  truthy:
+    allowed-values: ["true", "false"]
+    check-keys: false
+
+# Vendored trees: upstream's YAML, not ours to hold to our house style.
+ignore: |
+  .pixi/
+  _bmad/
+  .claude/
+  .agents/
+  .bmad-loop/
+  .github/

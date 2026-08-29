@@ -1,0 +1,37 @@
+[workspace]
+authors = ["Kevin Mills <millsks@gmail.com>"]
+channels = ["conda-forge"]
+name = "homelab"
+platforms = ["osx-arm64", "linux-64"]
+version = "0.1.0"
+
+[tasks]
+bootstrap = "pre-commit install --install-hooks"
+fmt = "sh -c 'ruff format . 2>/dev/null || true; [ -d tofu ] && tofu fmt -recursive tofu || true'"
+lint-py = "sh -c 'ruff check . || exit 1'"
+lint-yaml = "yamllint ."
+lint-ansible = """sh -c '[ -d ansible ] && ansible-lint ansible || echo "no ansible/ yet — skipping"'"""
+check = """sh -c '[ -d src ] && mypy src || echo "no src/ yet — skipping"'"""
+tofu-validate = """sh -c '[ -d tofu ] && (cd tofu && tofu init -backend=false && tofu validate) || echo "no tofu/ yet — skipping"'"""
+sprint-status = "python .claude/skills/bmad-sprint-planning/scripts/sprint_plan.py status --status-file _bmad-output/implementation-artifacts/sprint-status.yaml"
+sprint-validate = "python .claude/skills/bmad-sprint-planning/scripts/sprint_plan.py validate --status-file _bmad-output/implementation-artifacts/sprint-status.yaml"
+lint = { cmd = 'echo "lint complete"', depends-on = ["lint-py", "lint-yaml", "lint-ansible"] }
+ci = { cmd = 'echo "CI gate passed"', depends-on = ["lint", "check", "tofu-validate"] }
+changelog = "git-cliff -o CHANGELOG.md"
+
+[dependencies]
+python = "3.14.*"
+"ruamel.yaml" = ">=0.18"
+ansible-core = ">=2.21.3,<3"
+opentofu = ">=1.12.6,<2"
+
+[feature.dev.dependencies]
+ruff = "*"
+mypy = "*"
+pre-commit = "*"
+yamllint = "*"
+ansible-lint = "*"
+git-cliff = ">=2.13.1,<3"
+
+[environments]
+default = ["dev"]

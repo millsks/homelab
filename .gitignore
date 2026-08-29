@@ -2,3 +2,6 @@
 .bmad-loop/cache/
 .bmad-loop/policy.toml
 _bmad/render/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
