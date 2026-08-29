@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Project Asgard — interactive walkthrough of a 4-node homelab platform architecture: six stratified layers, network topology, identity flow, failure modes, and build order.">
+<style>
+  :root{color-scheme:light dark}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Project Asgard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,500;0,6..72,600;1,6..72,300&family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#EBECE7; --surface:#F7F8F4; --surface-2:#E2E4DE;
+  --ink:#1B211F; --soft:#59625E; --faint:#8A928E;
+  --accent:#3D7A6B; --accent-dim:#3D7A6B22;
+  --warm:#A8632F; --warm-dim:#A8632F1A;
+  --crit:#8F3A2A; --crit-dim:#8F3A2A14;
+  --rule:#D5D7D1;
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:74rem;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#111514; --surface:#191F1D; --surface-2:#212927;
+    --ink:#E3E6E1; --soft:#939C97; --faint:#6E7873;
+    --accent:#6FB5A0; --accent-dim:#6FB5A022;
+    --warm:#D18C55; --warm-dim:#D18C551F;
+    --crit:#C96A55; --crit-dim:#C96A5518;
+    --rule:#28302D;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111514; --surface:#191F1D; --surface-2:#212927;
+  --ink:#E3E6E1; --soft:#939C97; --faint:#6E7873;
+  --accent:#6FB5A0; --accent-dim:#6FB5A022;
+  --warm:#D18C55; --warm-dim:#D18C551F;
+  --crit:#C96A55; --crit-dim:#C96A5518;
+  --rule:#28302D;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.75rem}
+h1,h2,h3{font-family:var(--display);font-weight:500;text-wrap:balance;margin:0}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.eyebrow{font-family:var(--body);font-size:.7rem;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent)}
+
+/* ---------- hero ---------- */
+.hero{border-bottom:1px solid var(--rule);padding:5.5rem 0 4rem}
+.hero-grid{display:grid;gap:3rem;grid-template-columns:1fr}
+@media(min-width:900px){.hero-grid{grid-template-columns:1.15fr .85fr;align-items:center}}
+.hero h1{font-size:clamp(2.9rem,7vw,4.6rem);line-height:1.02;letter-spacing:-.02em;margin:.9rem 0 0}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.lede{font-family:var(--display);font-size:clamp(1.15rem,2vw,1.4rem);line-height:1.5;
+  font-weight:300;color:var(--soft);margin-top:1.5rem;max-width:34ch}
+.thesis{margin-top:2rem;padding:1.25rem 1.5rem;background:var(--accent-dim);
+  border-left:3px solid var(--accent);font-family:var(--display);font-size:1.08rem;line-height:1.5}
+.spec{display:flex;flex-wrap:wrap;gap:0 2.25rem;margin-top:2.25rem;
+  font-family:var(--mono);font-size:.76rem;color:var(--faint)}
+.spec b{color:var(--soft);font-weight:500}
+
+/* ---------- sections ---------- */
+section{padding:4.25rem 0;border-bottom:1px solid var(--rule)}
+.shead{max-width:60ch;margin-bottom:2.5rem}
+.shead h2{font-size:clamp(1.75rem,3.4vw,2.4rem);letter-spacing:-.015em;margin:.6rem 0 .85rem}
+.shead p{color:var(--soft)}
+
+/* ---------- layer stack ---------- */
+.stack{display:grid;gap:.4rem}
+.layer{display:grid;grid-template-columns:3.4rem 1fr;gap:1rem;align-items:start;
+  width:100%;text-align:left;background:var(--surface);border:1px solid var(--rule);
+  border-radius:2px;padding:1rem 1.15rem;cursor:pointer;color:inherit;font:inherit;
+  transition:border-color .15s,background .15s}
+.layer:hover{border-color:var(--accent)}
+.layer[aria-expanded="true"]{border-color:var(--accent);background:var(--surface-2)}
+.layer:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lnum{font-family:var(--mono);font-size:1.1rem;font-weight:500;color:var(--accent);
+  padding-top:.05rem}
+.lname{font-family:var(--display);font-size:1.2rem;font-weight:500}
+.lsum{color:var(--soft);font-size:.9rem;margin-top:.15rem}
+.ldet{display:none;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--rule)}
+.layer[aria-expanded="true"] .ldet{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.75rem}
+.chip{font-family:var(--mono);font-size:.72rem;padding:.2rem .5rem;border-radius:2px;
+  background:var(--accent-dim);color:var(--accent);border:1px solid transparent}
+.chip.host{background:transparent;border-color:var(--rule);color:var(--soft)}
+
+/* ---------- figures ---------- */
+figure{margin:0}
+.figbox{background:var(--surface);border:1px solid var(--rule);border-radius:2px;
+  padding:1.75rem 1.5rem;overflow-x:auto}
+.figbox svg{max-width:100%;height:auto;display:block;margin:0 auto;color:var(--ink)}
+figcaption{margin-top:.9rem;font-size:.86rem;color:var(--soft);max-width:62ch}
+figcaption b{color:var(--ink);font-weight:600}
+
+/* ---------- failure explorer ---------- */
+.fx{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.fx{grid-template-columns:15rem 1fr;align-items:start}}
+.fxlist{display:grid;gap:.35rem}
+.fxbtn{text-align:left;font:inherit;font-size:.92rem;color:var(--soft);cursor:pointer;
+  background:transparent;border:1px solid var(--rule);border-left:3px solid transparent;
+  border-radius:2px;padding:.6rem .85rem;transition:.15s}
+.fxbtn:hover{color:var(--ink);border-color:var(--faint)}
+.fxbtn[aria-selected="true"]{color:var(--ink);background:var(--surface);
+  border-left-color:var(--crit);font-weight:500}
+.fxbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fxpanel{background:var(--surface);border:1px solid var(--rule);border-radius:2px;padding:1.6rem}
+.sev{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.22rem .55rem;border-radius:2px;margin-bottom:.9rem}
+.sev.cat{background:var(--crit-dim);color:var(--crit)}
+.sev.deg{background:var(--warm-dim);color:var(--warm)}
+.sev.ok{background:var(--accent-dim);color:var(--accent)}
+.fxpanel h3{font-size:1.3rem;margin-bottom:.7rem}
+.fxrow{display:grid;grid-template-columns:1fr;gap:.3rem;padding:.75rem 0;
+  border-top:1px solid var(--rule)}
+@media(min-width:600px){.fxrow{grid-template-columns:9rem 1fr;gap:1rem}}
+.fxk{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--faint);padding-top:.15rem}
+.fxv{font-size:.94rem}
+
+/* ---------- reversals ---------- */
+.revs{display:grid;gap:1rem;grid-template-columns:1fr}
+@media(min-width:760px){.revs{grid-template-columns:1fr 1fr}}
+.rev{background:var(--surface);border:1px solid var(--rule);border-top:2px solid var(--warm);
+  border-radius:2px;padding:1.35rem}
+.rev h3{font-size:1.05rem;margin-bottom:.55rem}
+.rev .arrow{font-family:var(--mono);font-size:.8rem;color:var(--warm);margin-bottom:.6rem}
+.rev p{font-size:.9rem;color:var(--soft)}
+
+/* ---------- build order ---------- */
+.steps{display:grid;gap:0}
+.step{display:grid;grid-template-columns:3rem 1fr;gap:1rem;padding:.95rem 0;
+  border-top:1px solid var(--rule)}
+.step:last-child{border-bottom:1px solid var(--rule)}
+.sid{font-family:var(--mono);font-size:.85rem;font-weight:500;color:var(--accent)}
+.step.gate .sid{color:var(--warm)}
+.stitle{font-weight:600;font-size:.95rem}
+.snote{font-size:.87rem;color:var(--soft);margin-top:.15rem}
+
+/* ---------- gaps ---------- */
+.gaps{display:grid;gap:.5rem}
+.gap{display:grid;grid-template-columns:1fr;gap:.2rem;background:var(--surface);
+  border:1px solid var(--rule);border-left:3px solid var(--crit);border-radius:2px;padding:1rem 1.2rem}
+.gap b{font-size:.95rem}
+.gap span{font-size:.88rem;color:var(--soft)}
+footer{padding:3rem 0 4rem;color:var(--faint);font-size:.82rem}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Architecture spine · 28 decisions</span>
+      <h1>Project <em>Asgard</em></h1>
+      <p class="lede">Four mini PCs, a NAS and a UPS, assembled into a private cloud that behaves like a corporate environment rather than a pile of self-hosted containers.</p>
+      <div class="thesis">Everything here follows from one rule: <strong>no layer may require a higher layer in order to start or to authenticate.</strong></div>
+      <div class="spec">
+        <span><b>16</b>C / <b>32</b>T</span><span><b>128</b> GB</span><span><b>28</b> TB SHR-2</span><span><b>65</b> requirements</span><span><b>19</b> epics</span>
+      </div>
+    </div>
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 300 300" role="img" aria-label="Six stacked layers, each depending only on the layer below it">
+          <defs><marker id="dn" markerWidth="7" markerHeight="7" refX="3.5" refY="6" orient="auto"><polygon points="0,0 7,0 3.5,7" fill="currentColor"/></marker></defs>
+          <g font-family="JetBrains Mono, monospace" font-size="11">
+            <rect x="30" y="8"   width="240" height="34" fill="none" stroke="currentColor" opacity=".45"/><text x="42" y="30" fill="currentColor" opacity=".75">L5  Workloads</text>
+            <rect x="30" y="54"  width="240" height="34" fill="none" stroke="currentColor" opacity=".45"/><text x="42" y="76" fill="currentColor" opacity=".75">L4  Platform services</text>
+            <rect x="30" y="100" width="240" height="34" fill="none" stroke="currentColor" opacity=".45"/><text x="42" y="122" fill="currentColor" opacity=".75">L3  Yggdrasil</text>
+            <rect x="30" y="146" width="240" height="34" fill="none" stroke="#3D7A6B" stroke-width="1.6"/><text x="42" y="168" fill="#3D7A6B">L2  Foundation</text>
+            <rect x="30" y="192" width="240" height="34" fill="none" stroke="currentColor" opacity=".45"/><text x="42" y="214" fill="currentColor" opacity=".75">L1  Hypervisor</text>
+            <rect x="30" y="238" width="240" height="34" fill="none" stroke="currentColor" opacity=".45"/><text x="42" y="260" fill="currentColor" opacity=".75">L0  Physical</text>
+          </g>
+          <g stroke="currentColor" opacity=".5" marker-end="url(#dn)">
+            <line x1="150" y1="42" x2="150" y2="50"/><line x1="150" y1="88" x2="150" y2="96"/>
+            <line x1="150" y1="134" x2="150" y2="142"/><line x1="150" y1="180" x2="150" y2="188"/>
+            <line x1="150" y1="226" x2="150" y2="234"/>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Dependencies point only downward. <b>L2 is highlighted</b> because it is the only layer holding services deliberately kept out of the Kubernetes cluster.</figcaption>
+    </figure>
+  </div>
+</div>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">01 · The stack</span>
+    <h2>Six layers, and one test for where anything goes</h2>
+    <p>Services run inside the cluster by default. A service moves out only if it meets a named test — the cluster needs it to start or authenticate, a lower layer depends on it across cluster loss, it needs host-level identity a pod can't give, or recovery requires it. Applied across the platform, exactly two services qualify.</p>
+  </div>
+  <div class="stack" id="stack"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">02 · Topology</span>
+    <h2>Two traffic classes that never share a wire</h2>
+    <p>Each node is dual-homed. The counterintuitive part: the <em>faster</em> link carries bulk traffic and the <em>slower</em> one carries heartbeats.</p>
+  </div>
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 720 300" role="img" aria-label="Network topology: four nodes dual-homed to a data switch and an isolated membership switch">
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="currentColor"/></marker></defs>
+        <g font-family="JetBrains Mono, monospace" font-size="11" fill="currentColor">
+          <circle cx="45" cy="46" r="21" fill="none" stroke="currentColor" opacity=".5"/><text x="45" y="50" text-anchor="middle" font-size="9">WAN</text>
+          <rect x="96" y="26" width="104" height="40" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="148" y="43" text-anchor="middle" font-size="10">router</text><text x="148" y="57" text-anchor="middle" font-size="8.5" opacity=".6">not on UPS</text>
+          <rect x="250" y="26" width="96" height="40" fill="none" stroke="currentColor" opacity=".5" stroke-dasharray="4 3"/>
+          <text x="298" y="43" text-anchor="middle" font-size="10">bridge</text><text x="298" y="57" text-anchor="middle" font-size="8.5" opacity=".6">wireless</text>
+          <rect x="396" y="26" width="120" height="40" fill="none" stroke="currentColor" opacity=".7"/>
+          <text x="456" y="43" text-anchor="middle" font-size="10">data switch</text><text x="456" y="57" text-anchor="middle" font-size="8.5" opacity=".6">6 of 10 used</text>
+          <rect x="566" y="26" width="118" height="40" fill="none" stroke="currentColor" opacity=".7"/>
+          <text x="625" y="43" text-anchor="middle" font-size="10">nidavellir</text><text x="625" y="57" text-anchor="middle" font-size="8.5" opacity=".6">2.5 GbE</text>
+          <rect x="140" y="140" width="94" height="34" fill="none" stroke="currentColor" opacity=".7"/><text x="187" y="161" text-anchor="middle">odin</text>
+          <rect x="264" y="140" width="94" height="34" fill="none" stroke="currentColor" opacity=".7"/><text x="311" y="161" text-anchor="middle">thor</text>
+          <rect x="388" y="140" width="94" height="34" fill="none" stroke="currentColor" opacity=".7"/><text x="435" y="161" text-anchor="middle">heimdall</text>
+          <rect x="512" y="140" width="94" height="34" fill="none" stroke="currentColor" opacity=".7"/><text x="559" y="161" text-anchor="middle">tyr</text>
+          <rect x="140" y="248" width="466" height="38" fill="none" stroke="#3D7A6B" stroke-width="1.6"/>
+          <text x="373" y="265" text-anchor="middle" font-size="10.5" fill="#3D7A6B">membership switch</text>
+          <text x="373" y="279" text-anchor="middle" font-size="8.5" fill="#3D7A6B" opacity=".85">isolated · no uplink · no gateway</text>
+        </g>
+        <g stroke="currentColor" opacity=".45" fill="none">
+          <line x1="66" y1="46" x2="94" y2="46" marker-end="url(#ar)"/>
+          <line x1="200" y1="46" x2="248" y2="46" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+          <line x1="346" y1="46" x2="394" y2="46" marker-end="url(#ar)"/>
+          <line x1="516" y1="46" x2="564" y2="46"/>
+          <line x1="430" y1="66" x2="187" y2="140"/><line x1="442" y1="66" x2="311" y2="140"/>
+          <line x1="460" y1="66" x2="435" y2="140"/><line x1="480" y1="66" x2="559" y2="140"/>
+        </g>
+        <g stroke="#3D7A6B" stroke-width="1.8" fill="none">
+          <line x1="187" y1="174" x2="187" y2="248"/><line x1="311" y1="174" x2="311" y2="248"/>
+          <line x1="435" y1="174" x2="435" y2="248"/><line x1="559" y1="174" x2="559" y2="248"/>
+        </g>
+        <g font-family="Archivo, sans-serif" font-size="10" fill="currentColor" opacity=".6">
+          <text x="612" y="120" text-anchor="end">thin — storage, pods, backups, outbound · 2.5 GbE USB</text>
+        </g>
+        <text x="612" y="222" text-anchor="end" font-family="Archivo, sans-serif" font-size="10" fill="#3D7A6B">bold — cluster membership only · 1 GbE onboard</text>
+      </svg>
+    </div>
+    <figcaption>USB Ethernet resets and renumbers in ways an onboard controller doesn't. That's tolerable for traffic that retries, and <b>intolerable for the signalling that decides whether a node is alive</b> — so membership takes the slower, more reliable path. The membership switch connects to nothing else; joining the two would return membership to shared fabric.</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">03 · Identity</span>
+    <h2>One account, two protocols, one revocation</h2>
+    <p>The directory is the only account store. The identity provider federates to it and holds sessions and clients — never identity — so it can be rebuilt without loss.</p>
+  </div>
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 700 250" role="img" aria-label="Identity flow: hosts authenticate to the directory, services authenticate via the identity provider which federates to the same directory">
+        <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="currentColor"/></marker></defs>
+        <g font-family="JetBrains Mono, monospace" font-size="11" fill="currentColor">
+          <rect x="20" y="26" width="120" height="40" fill="none" stroke="currentColor" opacity=".6"/><text x="80" y="51" text-anchor="middle">operator</text>
+          <rect x="230" y="8" width="130" height="40" fill="none" stroke="currentColor" opacity=".6"/><text x="295" y="33" text-anchor="middle">node / guest</text>
+          <rect x="230" y="86" width="130" height="40" fill="none" stroke="currentColor" opacity=".6"/><text x="295" y="111" text-anchor="middle">relying party</text>
+          <rect x="425" y="86" width="120" height="40" fill="none" stroke="currentColor" opacity=".6"/><text x="485" y="105" text-anchor="middle" font-size="10">forseti</text><text x="485" y="118" text-anchor="middle" font-size="8.5" opacity=".6">IdP</text>
+          <rect x="425" y="8" width="120" height="60" fill="none" stroke="#3D7A6B" stroke-width="1.6"/>
+          <text x="485" y="30" text-anchor="middle" font-size="10" fill="#3D7A6B">mimir</text>
+          <text x="485" y="45" text-anchor="middle" font-size="8.5" fill="#3D7A6B" opacity=".85">the only</text>
+          <text x="485" y="57" text-anchor="middle" font-size="8.5" fill="#3D7A6B" opacity=".85">account store</text>
+        </g>
+        <g stroke="currentColor" opacity=".5" fill="none" marker-end="url(#ar2)">
+          <line x1="140" y1="38" x2="228" y2="28"/><line x1="140" y1="54" x2="228" y2="104"/>
+          <line x1="360" y1="28" x2="423" y2="34"/><line x1="360" y1="106" x2="423" y2="106"/>
+          <line x1="485" y1="86" x2="485" y2="70"/>
+        </g>
+        <g font-family="Archivo, sans-serif" font-size="9.5" fill="currentColor" opacity=".6">
+          <text x="184" y="26">SSH</text><text x="176" y="90">browser</text>
+          <text x="380" y="16">LDAP / Kerberos</text><text x="380" y="100">OIDC</text>
+          <text x="496" y="80">federates</text>
+        </g>
+        <rect x="180" y="170" width="440" height="58" fill="#8F3A2A" opacity=".09"/>
+        <rect x="180" y="170" width="3" height="58" fill="#8F3A2A"/>
+        <g font-family="Archivo, sans-serif" font-size="10.5" fill="currentColor">
+          <text x="198" y="190" font-weight="600">Account-lock must be mapped into the IdP.</text>
+          <text x="198" y="206" opacity=".72">No shipping mapper does this, and the obvious one inverts.</text>
+          <text x="198" y="221" opacity=".72">Unmapped, disabling an account never reaches SSO at all.</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Revocation stays one action against one account — but propagation is <b>bounded, not instant</b>, and each bound is recorded per relying party. Cached host credentials get an explicit maximum age; the hypervisor mints its own two-hour ticket with no back-channel logout and declares that ceiling honestly.</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">04 · Failure modes</span>
+    <h2>What breaks when something dies</h2>
+    <p>The most useful view for whoever is reading this mid-incident. Choose a component.</p>
+  </div>
+  <div class="fx">
+    <div class="fxlist" id="fxlist" role="tablist" aria-label="Failure scenarios"></div>
+    <div class="fxpanel" id="fxpanel" role="tabpanel" aria-live="polite"></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">05 · Reversals</span>
+    <h2>Four decisions that changed, and why</h2>
+    <p>Each was driven by a finding rather than a preference. They are recorded because the reasoning matters more than the outcome.</p>
+  </div>
+  <div class="revs" id="revs"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">06 · Build order</span>
+    <h2>A walking skeleton, then depth</h2>
+    <p>A thin vertical slice first, exercising every integration seam while each is still cheap to change — because integration seams are where this class of build fails. Nothing in the skeleton is redundant or complete.</p>
+  </div>
+  <div class="steps" id="steps"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <span class="eyebrow">07 · Accepted gaps</span>
+    <h2>Known, chosen, and written down</h2>
+    <p>Recorded so they stay decisions rather than becoming oversights.</p>
+  </div>
+  <div class="gaps" id="gaps"></div>
+</div></section>
+
+<footer><div class="wrap">Project Asgard · architecture spine, 28 decisions · companion to <span class="mono">ARCHITECTURE-SPINE.md</span> and <span class="mono">SOLUTION-DESIGN.md</span></div></footer>
+
+<script>
+const LAYERS=[
+ {n:"L5",name:"Workloads",sum:"The operator's own applications",body:"The layer the whole platform exists to serve. Deployed by reconciliation from the repository, published through Gateway API, authorizing from token claims.",chips:[],hosts:[]},
+ {n:"L4",name:"Platform services",sum:"Identity provider, databases, cache, registry, CI, observability, secrets",body:"Everything here runs as a workload inside the cluster. PostgreSQL sits on local NVMe under an operator that supplies streaming replication and automatic failover — faster than the NAS, survives node loss, and stays in the Kubernetes model.",chips:["AD-19","AD-21","AD-26"],hosts:["forseti","fafnir","ratatoskr","huginn","muninn","sindri","brokkr","andvari"]},
+ {n:"L3",name:"Yggdrasil",sum:"Kubernetes, storage classes, gateway, load balancer",body:"Three control-plane guests, one per node, placed by enforceable rules rather than intention. Bundled ingress is disabled in favour of MetalLB and Envoy Gateway on Gateway API. Two storage classes: NFS as default with ReadWriteMany, iSCSI for block semantics.",chips:["AD-14","AD-19","AD-26"],hosts:["urd","verdandi","skuld","brynhildr","sigrun","gondul"]},
+ {n:"L2",name:"Foundation",sum:"Directory, DNS, Kerberos, time, platform CA — deliberately outside the cluster",body:"The only two services that met the placement test. The directory is also the time authority, because Kerberos fails at roughly five minutes of skew and external time arrives over a wireless bridge that may be down. The platform CA sits here because the hypervisor below depends on it.",chips:["AD-1","AD-2","AD-5","AD-6","AD-25"],hosts:["mimir","mimir-replica","draupnir"]},
+ {n:"L1",name:"Hypervisor",sum:"Proxmox across four clustered nodes",body:"Guest root disks live on local NVMe rather than the NAS, which keeps a node's ability to shut itself down independent of shared storage. Out-of-band management exists in firmware and is claimed or disabled during the build — never left inherited.",chips:["AD-17","AD-22","AD-27","AD-28"],hosts:["odin","thor","heimdall","tyr"]},
+ {n:"L0",name:"Physical",sum:"Power, network fabric, rack",body:"Two switches carrying two traffic classes that never share a wire. One UPS with all eight outlets allocated and no spare. The uplink is a wireless bridge, because the rack has no wired path to the router.",chips:["AD-7","AD-11"],hosts:["nidavellir"]}];
+
+const FX=[
+ {id:"nas",label:"The NAS dies",sev:"cat",sevText:"Unrecoverable",title:"Home directories, volumes, and the backups all go together",rows:[
+  ["Impact","Bulk data is lost. Nidavellir holds home directories, persistent volumes, and the only backups — so it is simultaneously the source and the target."],
+  ["Survives","The repository is on GitHub. Directory data, database dumps, the CA root key and break-glass credentials are held encrypted on an offline SSD."],
+  ["Lost","Persistent volumes and home directories."],
+  ["Why accepted","No second bulk storage device exists and its purchase was deferred. This is the largest knowingly accepted risk in the design, and the highest-value v2 purchase."]]},
+ {id:"dir",label:"The directory dies",sev:"deg",sevText:"Degraded",title:"SSO stops everywhere; administrative access survives",rows:[
+  ["Impact","Every relying party stops honoring logins — kubectl, Grafana, the hypervisor UI, applications."],
+  ["Survives","Break-glass accounts on every host with local homes outside NFS-managed paths. The hypervisor's own local realm. Cached credentials for anyone who has authenticated before."],
+  ["Mitigation","A replica exists specifically so that patching the directory is not a platform-wide outage."],
+  ["Watch for","The directory is also the time authority. Extended loss means clock drift, and Kerberos fails at about five minutes of skew."]]},
+ {id:"node",label:"A node dies",sev:"ok",sevText:"Tolerated",title:"Three nodes carry the platform",rows:[
+  ["Impact","Guests on that node stop. Cluster membership continues on the remaining three."],
+  ["Why it fits","Total committed memory is capped at 90 GB of 128 precisely so three nodes can carry it — three provide 96 GB."],
+  ["Placement","No two control-plane members, directory instances, or database replicas share a node. Enforced in configuration, not by convention."],
+  ["Recovery","Rebuild from the repository. The destructive drill exists to prove this is routine rather than an ordeal."]]},
+ {id:"k8s",label:"Kubernetes dies",sev:"deg",sevText:"Degraded",title:"Applications are down; the platform is not",rows:[
+  ["Impact","All workloads stop — including the identity provider, databases, registry and observability."],
+  ["Survives","Identity, DNS, time and certificates all continue, because they sit below the cluster rather than inside it."],
+  ["Administration","The cluster stays administrable through its static credential; OIDC-backed kubectl is an enhancement, never a dependency."],
+  ["Cold start","Platform-critical images must resolve from upstream or the node image cache, never from the internal registry — which runs inside the cluster it serves."]]},
+ {id:"power",label:"Power fails",sev:"deg",sevText:"Orchestrated",title:"Twelve to fifteen minutes, spent deliberately",rows:[
+  ["Sequence","Workloads drain, guests stop, nodes stop, the NAS last."],
+  ["The mechanism","Ordering comes from tuned delay, not coordination — the storage appliance broadcasts UPS state but does not wait for its clients. Nodes act at about three minutes; the appliance at about ten."],
+  ["The margin","That seven-minute gap is the safety mechanism. It is measured by drill, recorded as a number, and re-measured after battery replacement."],
+  ["The catch","The router sits in a closet on a circuit outside the UPS, so no outbound notification can leave during a whole-house outage. The external dead-man's switch is the only alerting path that survives."]]},
+ {id:"uplink",label:"The uplink dies",sev:"ok",sevText:"Contained",title:"Nothing internal notices",rows:[
+  ["Impact","Package updates and image pulls stop. Alerts cannot leave the house."],
+  ["Unaffected","Storage, cluster membership, pod traffic, identity, and certificates — none of it crosses the bridge."],
+  ["Time","Internal time stays coherent because the directory is the authority and only it syncs upstream."],
+  ["Why it's mild","The bridge carries outbound traffic only, so its bandwidth and reliability land where they matter least."]]}];
+
+const REVS=[
+ {t:"The ingress controller",a:"ingress-nginx → Envoy Gateway",p:"Chosen for transferability, then found end-of-life during version verification — repository read-only, no CVE patches. The argument inverted: it had become a dead skill and an unpatched surface. Gateway API is the successor standard."},
+ {t:"Where PostgreSQL lives",a:"a VM → inside the cluster",p:"NFS was excluded for its loose fsync and locking semantics. iSCSI looked like the fix until the NAS proved HDD-only, which would have put database random I/O on spinning disks. Local NVMe under an operator beat the original on every axis."},
+ {t:"The access point",a:"cut → the only uplink",p:"Removed as a redundant household device, then reinstated as the platform's sole path to the internet once the physical topology turned out to forbid a cable. Only outbound traffic crosses it."},
+ {t:"Out-of-band management",a:"absent → present, unverified",p:"Believed missing, then found supported, then correctly challenged on whether an OS reinstall had cleared it. It had not — that interface lives in firmware. The rule became positive verification rather than inference in either direction."}];
+
+const STEPS=[
+ ["S1","Repository and procedure standard","The dual-form contract and the Procedure Index",0],
+ ["S2","Network, cluster, break-glass","Break-glass comes before directory login, or a lockout has no independent way in. Name resolution is provisional here",0],
+ ["S3","Shared storage, one share","",0],
+ ["S4","Directory, DNS, time, network login","asgard.home.arpa becomes real; provisional resolution retired",0],
+ ["S5","Platform CA","Before the cluster, because it runs outside it",0],
+ ["S6","Kubernetes, minimal","With storage, load balancer, and a gateway terminating TLS",0],
+ ["S7","Identity provider and federation","After the cluster, because it runs inside it",0],
+ ["S8","Reference application","The operator's own code, deployed from the repository, authorizing from token claims",1]];
+
+const GAPS=[
+ ["No backup independent of the NAS","The largest risk in the design. Deferred to v2."],
+ ["No network segmentation","Both switches are flat. Gateway bypass prevention is convention, not enforcement."],
+ ["No remote access","Every repair requires physical presence. Cut deliberately — and it removed a whole class of circular dependency with it."],
+ ["Drives permitted, not validated","Absent from the appliance's compatibility list. No vendor support path for a drive fault, which raises the value of tested restores."],
+ ["A fifth node is blocked","Before capacity, by two limits: no spare UPS outlet, and the appliance's UPS-client roster caps at five."]];
+
+const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;};
+const esc=(s)=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+const stack=document.getElementById('stack');
+LAYERS.forEach((L,i)=>{
+  const b=document.createElement('button');
+  b.className='layer';b.type='button';b.setAttribute('aria-expanded','false');
+  b.innerHTML=`<span class="lnum">${L.n}</span><span><span class="lname">${esc(L.name)}</span>
+    <span class="lsum">${esc(L.sum)}</span>
+    <span class="ldet"><p>${esc(L.body)}</p>
+    <span class="chips">${L.hosts.map(h=>`<span class="chip host">${esc(h)}</span>`).join('')}${L.chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</span>
+    </span></span>`;
+  b.addEventListener('click',()=>b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true'));
+  if(i===3)b.setAttribute('aria-expanded','true');
+  stack.appendChild(b);
+});
+
+const list=document.getElementById('fxlist'),panel=document.getElementById('fxpanel');
+function drawFx(i){
+  const f=FX[i];
+  panel.innerHTML=`<span class="sev ${f.sev}">${esc(f.sevText)}</span><h3>${esc(f.title)}</h3>
+    ${f.rows.map(r=>`<div class="fxrow"><div class="fxk">${esc(r[0])}</div><div class="fxv">${esc(r[1])}</div></div>`).join('')}`;
+  [...list.children].forEach((b,j)=>b.setAttribute('aria-selected',j===i?'true':'false'));
+}
+FX.forEach((f,i)=>{
+  const b=document.createElement('button');
+  b.className='fxbtn';b.type='button';b.setAttribute('role','tab');b.textContent=f.label;
+  b.addEventListener('click',()=>drawFx(i));
+  list.appendChild(b);
+});
+drawFx(0);
+
+document.getElementById('revs').innerHTML=REVS.map(r=>
+ `<div class="rev"><h3>${esc(r.t)}</h3><div class="arrow">${esc(r.a)}</div><p>${esc(r.p)}</p></div>`).join('');
+document.getElementById('steps').innerHTML=STEPS.map(s=>
+ `<div class="step${s[3]?' gate':''}"><div class="sid">${s[0]}</div><div><div class="stitle">${esc(s[1])}${s[3]?' — gate':''}</div>${s[2]?`<div class="snote">${esc(s[2])}</div>`:''}</div></div>`).join('');
+document.getElementById('gaps').innerHTML=GAPS.map(g=>
+ `<div class="gap"><b>${esc(g[0])}</b><span>${esc(g[1])}</span></div>`).join('');
+</script>
+</body>
+</html>
