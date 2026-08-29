@@ -214,75 +214,98 @@ Administrative interfaces that *do* have UIs — the hypervisor, the storage app
 
 | FR | Epic | |
 |---|---|---|
-| FR-1 | S1 | Every procedure exists in both forms, against an enumerated… |
-| FR-2 | S1 | Manual execution produces a converged system |
-| FR-3 | S1 | Documentation defects are resolved at discovery |
-| FR-4 | S1 | All configuration originates in the Repository |
-| FR-5 | S1 | Procedures declare their verification |
-| FR-6 | S2 | Four Nodes form one Cluster |
-| FR-7 | S2 | A Node can be rebuilt from the Repository |
-| FR-8 | S2 | Guests are provisioned declaratively |
-| FR-9 | S2 | Guests can be snapshotted and rolled back |
-| FR-10 | S2 | The Cluster is manageable when the Directory is unavailable |
-| FR-11 | S4 | Every Node, Guest, and service is reachable by name |
-| FR-12 | S2 | Addressing is deterministic and recorded |
-| FR-13 | D2 | Name resolution survives a single failure |
-| FR-14 | S2 | Household devices are unaffected |
-| FR-15 | D1 | Home Directories are identical on every host |
-| FR-16 | S3 | Storage unavailability degrades rather than hangs |
-| FR-17 | S6 | Workloads obtain Persistent Volumes on demand |
-| FR-18 | D1 | PostgreSQL does not run on NFS |
-| FR-19 | D5 | Storage capacity and health are visible |
-| FR-20 | S4 | One Account authenticates to every host |
-| FR-21 | D2 | Authorization is driven by Group membership |
-| FR-22 | D2 | Disabling an Account revokes host access within a bounded w… |
-| FR-23 | D2 | Hosts authenticate during a Directory outage for known Acco… |
-| FR-24 | S2 | Break-glass access exists on every host and survives storag… |
-| FR-25 | D2 | The Directory survives loss of one instance |
-| FR-26 | S4 | Accounts are defined in the Repository |
-| FR-27 | S5 | One authority issues all internal certificates |
-| FR-28 | S5 | Trust is distributed automatically |
-| FR-29 | S5 | Certificates renew without manual action |
-| FR-30 | S7 | The IdP federates to the Directory |
-| FR-31 | S7 | Group membership appears in Tokens as claims |
-| FR-32 | D9 | Administrative interfaces authenticate through the IdP |
-| FR-33 | S7 | Workloads can be registered as Relying Parties |
-| FR-34 | D9 | Services without native OIDC are fronted |
-| FR-35 | D9 | Account disablement propagates to Relying Parties within st… |
-| FR-36 | D5 | Authentication events are recorded |
-| FR-37 | S6 | Yggdrasil survives loss of one Control Plane Guest |
-| FR-38 | S6 | Control Plane Guests are distributed across Nodes |
-| FR-39 | D9 | `kubectl` authenticates through the IdP |
-| FR-40 | S6 | Yggdrasil is rebuildable from the Repository |
-| FR-41 | S6 | Workloads reach the network by stable name |
-| FR-42 | S8 | Workload state reconciles from the Repository |
-| FR-43 | D3 | Container images are built and stored within Asgard |
-| FR-44 | S8 | A new application reaches production by a documented path |
-| FR-45 | D3 | Deployments can be rolled back |
-| FR-46 | D4 | Workloads can obtain a database |
-| FR-47 | D4 | PostgreSQL is backed up and restorable |
-| FR-48 | D4 | Redis is available to Workloads |
-| FR-49 | D5 | Platform metrics are collected and retained |
-| FR-50 | D5 | Logs are centralized and searchable |
-| FR-51 | D5 | Failures generate alerts |
-| FR-52 | D9 | Dashboards authenticate through the IdP |
-| FR-53 | S1 | No plaintext secret is committed |
-| FR-54 | D6 | Workloads obtain secrets without manual injection |
-| FR-55 | D6 | Break-glass credentials are held outside Asgard |
-| FR-56 | D7 | The platform shuts down cleanly on sustained power loss |
-| FR-57 | D7 | Shutdown order is achieved by tuned delay, with proven margin |
-| FR-58 | D7 | All shutdown participants remain powered until they act |
-| FR-59 | D7 | Power events are visible and alerted |
-| FR-60 | D7 | The Shutdown Sequence is proven by Drill |
-| FR-61 | D8 | Platform state is backed up automatically |
-| FR-62 | D8 | Backups survive loss of any single Node |
-| FR-63 | D8 | Restores are verified, not assumed |
-| FR-64 | D10 | The platform can be rebuilt from Repository and backups |
-| FR-65 | S2 | Nodes are wired, dual-homed, and separate membership traffi… |
+| FR-1 | 1 | Every procedure exists in both forms, against an enumerated… |
+| FR-2 | 1 | Manual execution produces a converged system |
+| FR-3 | 1 | Documentation defects are resolved at discovery |
+| FR-4 | 1 | All configuration originates in the Repository |
+| FR-5 | 1 | Procedures declare their verification |
+| FR-6 | 2 | Four Nodes form one Cluster |
+| FR-7 | 2 | A Node can be rebuilt from the Repository |
+| FR-8 | 2 | Guests are provisioned declaratively |
+| FR-9 | 2 | Guests can be snapshotted and rolled back |
+| FR-10 | 2 | The Cluster is manageable when the Directory is unavailable |
+| FR-11 | 4 | Every Node, Guest, and service is reachable by name |
+| FR-12 | 2 | Addressing is deterministic and recorded |
+| FR-13 | 10 | Name resolution survives a single failure |
+| FR-14 | 2 | Household devices are unaffected |
+| FR-15 | 9 | Home Directories are identical on every host |
+| FR-16 | 3 | Storage unavailability degrades rather than hangs |
+| FR-17 | 6 | Workloads obtain Persistent Volumes on demand |
+| FR-18 | 9 | PostgreSQL does not run on NFS |
+| FR-19 | 13 | Storage capacity and health are visible |
+| FR-20 | 4 | One Account authenticates to every host |
+| FR-21 | 10 | Authorization is driven by Group membership |
+| FR-22 | 10 | Disabling an Account revokes host access within a bounded w… |
+| FR-23 | 10 | Hosts authenticate during a Directory outage for known Acco… |
+| FR-24 | 2 | Break-glass access exists on every host and survives storag… |
+| FR-25 | 10 | The Directory survives loss of one instance |
+| FR-26 | 4 | Accounts are defined in the Repository |
+| FR-27 | 5 | One authority issues all internal certificates |
+| FR-28 | 5 | Trust is distributed automatically |
+| FR-29 | 5 | Certificates renew without manual action |
+| FR-30 | 7 | The IdP federates to the Directory |
+| FR-31 | 7 | Group membership appears in Tokens as claims |
+| FR-32 | 17 | Administrative interfaces authenticate through the IdP |
+| FR-33 | 7 | Workloads can be registered as Relying Parties |
+| FR-34 | 17 | Services without native OIDC are fronted |
+| FR-35 | 17 | Account disablement propagates to Relying Parties within st… |
+| FR-36 | 13 | Authentication events are recorded |
+| FR-37 | 6 | Yggdrasil survives loss of one Control Plane Guest |
+| FR-38 | 6 | Control Plane Guests are distributed across Nodes |
+| FR-39 | 17 | `kubectl` authenticates through the IdP |
+| FR-40 | 6 | Yggdrasil is rebuildable from the Repository |
+| FR-41 | 6 | Workloads reach the network by stable name |
+| FR-42 | 8 | Workload state reconciles from the Repository |
+| FR-43 | 11 | Container images are built and stored within Asgard |
+| FR-44 | 8 | A new application reaches production by a documented path |
+| FR-45 | 11 | Deployments can be rolled back |
+| FR-46 | 12 | Workloads can obtain a database |
+| FR-47 | 12 | PostgreSQL is backed up and restorable |
+| FR-48 | 12 | Redis is available to Workloads |
+| FR-49 | 13 | Platform metrics are collected and retained |
+| FR-50 | 13 | Logs are centralized and searchable |
+| FR-51 | 13 | Failures generate alerts |
+| FR-52 | 17 | Dashboards authenticate through the IdP |
+| FR-53 | 1 | No plaintext secret is committed |
+| FR-54 | 14 | Workloads obtain secrets without manual injection |
+| FR-55 | 14 | Break-glass credentials are held outside Asgard |
+| FR-56 | 15 | The platform shuts down cleanly on sustained power loss |
+| FR-57 | 15 | Shutdown order is achieved by tuned delay, with proven margin |
+| FR-58 | 15 | All shutdown participants remain powered until they act |
+| FR-59 | 15 | Power events are visible and alerted |
+| FR-60 | 15 | The Shutdown Sequence is proven by Drill |
+| FR-61 | 16 | Platform state is backed up automatically |
+| FR-62 | 16 | Backups survive loss of any single Node |
+| FR-63 | 16 | Restores are verified, not assumed |
+| FR-64 | 18 | The platform can be rebuilt from Repository and backups |
+| FR-65 | 2 | Nodes are wired, dual-homed, and separate membership traffi… |
 
 ## Epic List
 
-### Epic S1: Repository, Procedure standard, and secret handling
+Epics are numbered 1-18 so the build tooling can resolve stories by number. The phase each belongs to is stated under every epic, and the mapping below preserves the S/D labels used in the PRD's delivery plan and the architecture spine.
+
+| Epic | Was | Phase |
+|---|---|---|
+| 1 | S1 | Walking Skeleton |
+| 2 | S2 | Walking Skeleton |
+| 3 | S3 | Walking Skeleton |
+| 4 | S4 | Walking Skeleton |
+| 5 | S5 | Walking Skeleton |
+| 6 | S6 | Walking Skeleton |
+| 7 | S7 | Walking Skeleton |
+| 8 | S8 | Walking Skeleton |
+| 9 | D1 | Deepen |
+| 10 | D2 | Deepen |
+| 11 | D3 | Deepen |
+| 12 | D4 | Deepen |
+| 13 | D5 | Deepen |
+| 14 | D6 | Deepen |
+| 15 | D7 | Deepen |
+| 16 | D8 | Deepen |
+| 17 | D9 | Deepen |
+| 18 | D10 | Deepen |
+
+### Epic 1: Repository, Procedure standard, and secret handling
 
 *Walking Skeleton*
 
@@ -291,7 +314,7 @@ The operator can write a Procedure and have its two halves checked against each 
 **FRs covered:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-53
 **Governed by:** AD-3, AD-4, AD-15, AD-16, AD-20, AD-22
 
-### Epic S2: Nodes, cluster, network, and break-glass
+### Epic 2: Nodes, cluster, network, and break-glass
 
 *Walking Skeleton*
 
@@ -300,7 +323,7 @@ The operator can create and manage Guests across four clustered Nodes, and can a
 **FRs covered:** FR-6, FR-7, FR-8, FR-9, FR-10, FR-12, FR-14, FR-24, FR-65
 **Governed by:** AD-1, AD-7, AD-9, AD-17, AD-22, AD-27, AD-28
 
-### Epic S3: Shared storage, first export
+### Epic 3: Shared storage, first export
 
 *Walking Skeleton*
 
@@ -309,7 +332,7 @@ The operator can mount storage from the appliance on a Guest, with mount semanti
 **FRs covered:** FR-16
 **Governed by:** AD-8, AD-22
 
-### Epic S4: Directory, DNS, time, and network login
+### Epic 4: Directory, DNS, time, and network login
 
 *Walking Skeleton*
 
@@ -318,7 +341,7 @@ The operator logs into all four Nodes with one account, and asgard.home.arpa res
 **FRs covered:** FR-11, FR-20, FR-26
 **Governed by:** AD-2, AD-6, AD-17, AD-25
 
-### Epic S5: Platform certificate authority
+### Epic 5: Platform certificate authority
 
 *Walking Skeleton*
 
@@ -327,7 +350,7 @@ Every internal endpoint presents a trusted certificate, renewed without interven
 **FRs covered:** FR-27, FR-28, FR-29
 **Governed by:** AD-5, AD-18
 
-### Epic S6: Kubernetes cluster with storage and gateway
+### Epic 6: Kubernetes cluster with storage and gateway
 
 *Walking Skeleton*
 
@@ -336,7 +359,7 @@ The operator can deploy a Workload and reach it by name over TLS. Three control-
 **FRs covered:** FR-17, FR-37, FR-38, FR-40, FR-41
 **Governed by:** AD-1, AD-8, AD-14, AD-19, AD-26
 
-### Epic S7: Identity provider and federation
+### Epic 7: Identity provider and federation
 
 *Walking Skeleton*
 
@@ -345,7 +368,7 @@ The operator's one Directory account authenticates to a service through OIDC, wi
 **FRs covered:** FR-30, FR-31, FR-33
 **Governed by:** AD-2, AD-10, AD-18
 
-### Epic S8: Reference application, end to end — SKELETON GATE
+### Epic 8: Reference application, end to end — SKELETON GATE
 
 *Walking Skeleton*
 
@@ -354,7 +377,7 @@ The operator's own code, committed to the Repository, deployed by reconciliation
 **FRs covered:** FR-42, FR-44
 **Governed by:** AD-3, AD-14, AD-27
 
-### Epic D1: Storage depth
+### Epic 9: Storage depth
 
 *Deepen*
 
@@ -363,7 +386,7 @@ Home Directories follow the operator to every host, volumes provision on demand 
 **FRs covered:** FR-15, FR-18
 **Governed by:** AD-8, AD-25
 
-### Epic D2: Identity depth
+### Epic 10: Identity depth
 
 *Deepen*
 
@@ -372,7 +395,7 @@ Identity survives losing an instance, authorisation is driven centrally by group
 **FRs covered:** FR-13, FR-21, FR-22, FR-23, FR-25
 **Governed by:** AD-2, AD-9, AD-10, AD-26
 
-### Epic D3: Delivery depth
+### Epic 11: Delivery depth
 
 *Deepen*
 
@@ -381,7 +404,7 @@ Images are built from committed source inside the platform, traceable to the com
 **FRs covered:** FR-43, FR-45
 **Governed by:** AD-4, AD-20, AD-27
 
-### Epic D4: Stateful services
+### Epic 12: Stateful services
 
 *Deepen*
 
@@ -390,7 +413,7 @@ Workloads obtain a database and a cache through a documented Procedure, with the
 **FRs covered:** FR-46, FR-47, FR-48
 **Governed by:** AD-8, AD-19, AD-21, AD-26
 
-### Epic D5: Observability
+### Epic 13: Observability
 
 *Deepen*
 
@@ -399,7 +422,7 @@ The operator learns about failures from the platform rather than by noticing, an
 **FRs covered:** FR-19, FR-36, FR-49, FR-50, FR-51
 **Governed by:** AD-12, AD-19, AD-23
 
-### Epic D6: Secrets management
+### Epic 14: Secrets management
 
 *Deepen*
 
@@ -408,7 +431,7 @@ Secrets reach Workloads at runtime and are revocable, and everything needed to r
 **FRs covered:** FR-54, FR-55
 **Governed by:** AD-15, AD-24
 
-### Epic D7: Power continuity
+### Epic 15: Power continuity
 
 *Deepen*
 
@@ -417,7 +440,7 @@ An unattended power failure ends with the platform cleanly down and nothing corr
 **FRs covered:** FR-56, FR-57, FR-58, FR-59, FR-60
 **Governed by:** AD-11, AD-12
 
-### Epic D8: Backup and verified restore
+### Epic 16: Backup and verified restore
 
 *Deepen*
 
@@ -426,7 +449,7 @@ Every class of data has a restore that has actually been performed, because a ba
 **FRs covered:** FR-61, FR-62, FR-63
 **Governed by:** AD-21, AD-24
 
-### Epic D9: Single sign-on breadth
+### Epic 17: Single sign-on breadth
 
 *Deepen*
 
@@ -435,7 +458,7 @@ One account and one session reach every administrative interface, including kube
 **FRs covered:** FR-32, FR-34, FR-35, FR-39, FR-52
 **Governed by:** AD-10, AD-14
 
-### Epic D10: Destructive rebuild drill — DOCUMENTATION GATE
+### Epic 18: Destructive rebuild drill — DOCUMENTATION GATE
 
 *Deepen*
 
@@ -459,13 +482,13 @@ Three layers of work are genuinely manual and their Runbooks have no Automation 
 
 Throughout, *the operator* is the single administrator this platform serves.
 
-## Epic S1: Repository, Procedure standard, and secret handling
+## Epic 1: Repository, Procedure standard, and secret handling
 
 Establishes how everything afterwards gets written. The Procedure Index is what makes FR-1 countable and SM-1/SM-2 measurable — without it, "every operational activity" quantifies over an unbounded set.
 
 **FRs covered:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-53 · **Governed by:** AD-3, AD-4, AD-15, AD-16, AD-20, AD-22
 
-### Story S1.1: Repository skeleton with layered ownership
+### Story 1.1: Repository skeleton with layered ownership
 
 As the operator,
 I want a repository whose structure mirrors the platform's dependency layers,
@@ -482,7 +505,7 @@ So that every artefact has one obvious home and ownership is never ambiguous.
 **And** the table states the provisioning/configuration split by **attribute** rather than by moment — the provisioning tool declares virtual hardware and guest existence and hands over one reachable SSH endpoint; the configuration tool declares everything inside the OS, including addressing and accounts
 **And** no resource class appears with two owners or none
 
-### Story S1.2: Procedure Index and the dual-form contract
+### Story 1.2: Procedure Index and the dual-form contract
 
 As the operator,
 I want an authoritative list of every Procedure the platform requires,
@@ -503,7 +526,7 @@ So that "every operational activity is documented" is a countable claim rather t
 **When** the omission is noticed
 **Then** it is recorded as a defect in the Index and closed before the activity counts as complete
 
-### Story S1.3: Convergence test harness
+### Story 1.3: Convergence test harness
 
 As the operator,
 I want to prove that my runbooks and my automation agree,
@@ -525,9 +548,9 @@ So that documentation drift is detectable rather than discovered years later.
 **Given** a push-based layer with no reconciliation loop
 **When** the scheduled check-mode run executes
 **Then** a non-empty diff exits non-zero and is recorded, so it cannot pass silently
-**And** the check is registered in the Procedure Index as an alert source, to be wired to notification in D5.5 — this story does not depend on alerting existing
+**And** the check is registered in the Procedure Index as an alert source, to be wired to notification in 13.5 — this story does not depend on alerting existing
 
-### Story S1.4: Encrypted secrets before a secret store exists
+### Story 1.4: Encrypted secrets before a secret store exists
 
 As the operator,
 I want to commit configuration containing secret material to a public repository safely,
@@ -550,13 +573,13 @@ So that the platform can be built before any runtime secret store is available.
 **When** its storage location is examined
 **Then** it is escrowed outside the repository and outside any single un-escrowed machine
 
-## Epic S2: Nodes, cluster, network, and break-glass
+## Epic 2: Nodes, cluster, network, and break-glass
 
-Four clustered Nodes and a guaranteed way back in. Break-glass and firmware management land here deliberately — **before** Directory login exists in S4, because enabling centralised authentication without an independent path first is how a lockout becomes unrecoverable.
+Four clustered Nodes and a guaranteed way back in. Break-glass and firmware management land here deliberately — **before** Directory login exists in 4, because enabling centralised authentication without an independent path first is how a lockout becomes unrecoverable.
 
 **FRs covered:** FR-6, FR-7, FR-8, FR-9, FR-10, FR-12, FR-14, FR-24, FR-65 · **Governed by:** AD-1, AD-7, AD-9, AD-17, AD-22, AD-27, AD-28
 
-### Story S2.1: Address plan and interface allocation
+### Story 2.1: Address plan and interface allocation
 
 As the operator,
 I want every address determined before anything is built,
@@ -576,7 +599,7 @@ So that a rebuilt Node returns to the same address without archaeology.
 **When** Asgard is brought up
 **Then** non-Asgard devices continue to use the household router unchanged, and Asgard does not serve DHCP for the household LAN
 
-### Story S2.2: Out-of-band management claimed or disabled
+### Story 2.2: Out-of-band management claimed or disabled
 
 As the operator,
 I want the firmware management interface in a known and chosen state,
@@ -600,7 +623,7 @@ So that a remote power-and-console interface is not sitting on my flat network a
 **When** the decision is recorded
 **Then** the disabled state is declared in the repository rather than inherited
 
-### Story S2.3: Node build — hypervisor, dual-homed networking
+### Story 2.3: Node build — hypervisor, dual-homed networking
 
 As the operator,
 I want a Node built to a documented standard,
@@ -621,7 +644,7 @@ So that all four are identical and a fifth would be too.
 **When** it runs against a hand-built Node
 **Then** it reports zero changes
 
-### Story S2.4: Break-glass access that survives every dependency
+### Story 2.4: Break-glass access that survives every dependency
 
 As the operator,
 I want a way into every host that depends on nothing else,
@@ -645,7 +668,7 @@ So that the emergency path works during the emergency it exists for.
 **When** their storage is examined
 **Then** they are escrowed outside the platform and recoverable without any platform component running
 
-### Story S2.5: Cluster formation
+### Story 2.5: Cluster formation
 
 As the operator,
 I want four Nodes managed as one Cluster,
@@ -661,7 +684,7 @@ So that guests can be placed, moved, and recovered across them.
 **And** loss of any one Node leaves the remaining three operating and manageable
 **And** the Cluster management interface authenticates with a local realm that works with no directory present
 
-### Story S2.6: Declarative Guest provisioning
+### Story 2.6: Declarative Guest provisioning
 
 As the operator,
 I want Guests defined in the repository rather than clicked into existence,
@@ -681,7 +704,7 @@ So that a destroyed Guest returns from its declaration.
 **When** its handling is examined
 **Then** it is a versioned artefact with a stated location and locking behaviour, and appears in the escrow list
 
-### Story S2.7: Snapshot and rollback
+### Story 2.7: Snapshot and rollback
 
 As the operator,
 I want to snapshot a Guest before a risky change,
@@ -695,7 +718,7 @@ So that experimenting costs minutes rather than an afternoon.
 **When** a snapshot is taken and a destructive change is made
 **Then** restoring the snapshot returns the Guest to its prior state including disk contents, without reinstallation
 
-### Story S2.8: Node rebuild from the repository
+### Story 2.8: Node rebuild from the repository
 
 As the operator,
 I want to destroy a Node and bring it back,
@@ -715,13 +738,13 @@ So that the claim of reproducibility is evidence rather than assertion.
 **When** the rebuild is performed
 **Then** the gap is recorded as a documentation defect and closed before the rebuild counts as complete
 
-## Epic S3: Shared storage, first export
+## Epic 3: Shared storage, first export
 
-The skeleton's proof that storage mounts. Thin by design — the substantive storage work is D1 — but it carries one decision that must be made at first mount rather than revisited later.
+The skeleton's proof that storage mounts. Thin by design — the substantive storage work is 9 — but it carries one decision that must be made at first mount rather than revisited later.
 
 **FRs covered:** FR-16 · **Governed by:** AD-8, AD-22
 
-### Story S3.1: Storage pool and first export
+### Story 3.1: Storage pool and first export
 
 As the operator,
 I want the appliance serving a share,
@@ -737,7 +760,7 @@ So that Guests have somewhere shared to write.
 **And** the appliance's configuration is declared in the repository as a configuration item with a named owner, not treated as an exception
 **And** one export exists with declared access controls
 
-### Story S3.2: Client mount with deliberate semantics
+### Story 3.2: Client mount with deliberate semantics
 
 As the operator,
 I want storage interruptions to degrade rather than wedge,
@@ -757,13 +780,13 @@ So that a storage outage does not take the hosts down with it.
 **When** the operator logs into the Guest with the break-glass account
 **Then** the session works, no process is stuck unkillable, and recovery on the appliance's return requires no reboot
 
-## Epic S4: Directory, DNS, time, and network login
+## Epic 4: Directory, DNS, time, and network login
 
 One account works on all four Nodes, and `asgard.home.arpa` becomes real. Numeric identity is pinned here because it cannot be retrofitted.
 
 **FRs covered:** FR-11, FR-20, FR-26 · **Governed by:** AD-2, AD-6, AD-17, AD-25
 
-### Story S4.1: Directory Guest built on the second OS family
+### Story 4.1: Directory Guest built on the second OS family
 
 As the operator,
 I want the directory host built by automation that knows it is not the hypervisor's OS family,
@@ -779,7 +802,7 @@ So that mixed-OS support is proven at the first opportunity rather than retrofit
 **And** the automation selects package names, service names, and firewall tooling by OS family rather than assuming one
 **And** a host-build Runbook exists for each family in the Procedure Index
 
-### Story S4.2: Directory installed with pinned numeric identity
+### Story 4.2: Directory installed with pinned numeric identity
 
 As the operator,
 I want UID and GID ranges fixed in the repository before any account exists,
@@ -798,7 +821,7 @@ So that a future rebuild does not orphan every file on shared storage.
 **When** the directory is rebuilt from the repository and the file is accessed
 **Then** ownership resolves to the same account, because shared storage authorises by number rather than by name
 
-### Story S4.3: DNS zone and records
+### Story 4.3: DNS zone and records
 
 As the operator,
 I want every host reachable by name,
@@ -812,9 +835,9 @@ So that nothing downstream has to know an address.
 **When** any Node, Guest, or service is queried
 **Then** forward resolution succeeds within `asgard.home.arpa` and reverse resolution succeeds for every Node and Guest
 **And** names follow the naming registry, with any new name taken from the reserve pool and added to the registry in the same change
-**And** the provisional resolution used in S2 is retired
+**And** the provisional resolution used in 2 is retired
 
-### Story S4.4: Time authority
+### Story 4.4: Time authority
 
 As the operator,
 I want internal time to stay coherent when the internet link is down,
@@ -833,7 +856,7 @@ So that Kerberos does not fail platform-wide because of a wireless bridge.
 **When** hosts are compared
 **Then** internal clocks remain mutually coherent, well inside the tolerance authentication requires
 
-### Story S4.5: Host enrolment and network login
+### Story 4.5: Host enrolment and network login
 
 As the operator,
 I want one account that logs into every host,
@@ -853,13 +876,13 @@ So that I stop maintaining local users.
 **When** enrolment completes
 **Then** it remains local, unmanaged by the directory, and still functional
 
-## Epic S5: Platform certificate authority
+## Epic 5: Platform certificate authority
 
 Trusted TLS everywhere internal, renewed without intervention. Sequenced before the cluster because it runs outside it and the cluster's own endpoints need it.
 
 **FRs covered:** FR-27, FR-28, FR-29 · **Governed by:** AD-5, AD-18
 
-### Story S5.1: Platform CA with ACME
+### Story 5.1: Platform CA with ACME
 
 As the operator,
 I want one authority issuing every internal certificate over one protocol,
@@ -876,7 +899,7 @@ So that renewal is a solved problem rather than four bespoke ones.
 **And** the directory's own integrated CA is scoped to issuing only the directory's internal certificates
 **And** the CA root key is escrowed outside the platform
 
-### Story S5.2: Trust distributed automatically
+### Story 5.2: Trust distributed automatically
 
 As the operator,
 I want no certificate warnings anywhere,
@@ -895,7 +918,7 @@ So that trust is real rather than clicked past.
 **When** it is reached from any host
 **Then** no certificate warning appears and the chain terminates at the platform CA
 
-### Story S5.3: Automatic issuance and renewal
+### Story 5.3: Automatic issuance and renewal
 
 As the operator,
 I want certificates to renew themselves,
@@ -912,15 +935,15 @@ So that expiry is not an outage waiting for a calendar reminder.
 
 **Given** a renewal failure
 **When** it occurs
-**Then** it is detected and recorded before the certificate expires, with the check registered as an alert source for D5.5 to wire — this story does not depend on alerting existing
+**Then** it is detected and recorded before the certificate expires, with the check registered as an alert source for 13.5 to wire — this story does not depend on alerting existing
 
-## Epic S6: Kubernetes cluster with storage and gateway
+## Epic 6: Kubernetes cluster with storage and gateway
 
 Somewhere to deploy, reachable by name over TLS. Three control-plane Guests from the start — the spread is required and costs almost nothing now against a rebuild later.
 
 **FRs covered:** FR-17, FR-37, FR-38, FR-40, FR-41 · **Governed by:** AD-1, AD-8, AD-14, AD-19, AD-26
 
-### Story S6.1: Control plane across fault domains
+### Story 6.1: Control plane across fault domains
 
 As the operator,
 I want the cluster to survive losing a Node,
@@ -943,7 +966,7 @@ So that a single hardware failure is not a platform outage.
 **When** capacity is totalled
 **Then** committed memory is within the declared ceiling and the schedulable floor still holds, both checked in the commit that places them
 
-### Story S6.2: Worker Guests and cluster composition in the repository
+### Story 6.2: Worker Guests and cluster composition in the repository
 
 As the operator,
 I want the cluster's composition declared,
@@ -959,7 +982,7 @@ So that it can be rebuilt without remembering how it was assembled.
 **And** persistent volume data survives the rebuild
 **And** workloads return by reconciliation rather than manual reapplication
 
-### Story S6.3: Storage classes from the appliance
+### Story 6.3: Storage classes from the appliance
 
 As the operator,
 I want workloads to obtain storage on demand,
@@ -979,7 +1002,7 @@ So that deploying something with state is not a manual provisioning task.
 **When** its storage class is chosen
 **Then** it is not placed on appliance-backed storage by any protocol, because the appliance is spinning-disk only
 
-### Story S6.4: Load balancer address pool
+### Story 6.4: Load balancer address pool
 
 As the operator,
 I want stable addresses for published services,
@@ -994,7 +1017,7 @@ So that DNS can point at something that does not move.
 **Then** it receives one from the declared pool, and the pool sits inside the address plan
 **And** the address is stable across rescheduling
 
-### Story S6.5: Gateway with automatic TLS
+### Story 6.5: Gateway with automatic TLS
 
 As the operator,
 I want to publish a workload by name over TLS without touching DNS or certificates,
@@ -1013,13 +1036,13 @@ So that shipping something is a commit rather than a checklist.
 **When** it is reached from the LAN
 **Then** it resolves by name within the domain, terminates TLS with a trusted certificate, and requires no manual DNS or certificate step to publish
 
-## Epic S7: Identity provider and federation
+## Epic 7: Identity provider and federation
 
 One directory account authenticating to a service through OIDC, with groups arriving as claims. Follows the cluster because it runs inside it.
 
 **FRs covered:** FR-30, FR-31, FR-33 · **Governed by:** AD-2, AD-10, AD-18
 
-### Story S7.1: Identity provider deployed
+### Story 7.1: Identity provider deployed
 
 As the operator,
 I want an OIDC authorization server running in the platform,
@@ -1039,7 +1062,7 @@ So that my applications have something real to authenticate against.
 **When** the identity provider is unavailable
 **Then** the cluster remains administrable through its static credential, because identity-backed access is an enhancement and never a dependency
 
-### Story S7.2: Federation to the directory
+### Story 7.2: Federation to the directory
 
 As the operator,
 I want the identity provider to consume accounts rather than own them,
@@ -1059,7 +1082,7 @@ So that there is one account store and one place to revoke.
 **When** it returns
 **Then** no account data was lost, because it never owned any
 
-### Story S7.3: Group membership as token claims
+### Story 7.3: Group membership as token claims
 
 As the operator,
 I want group membership to arrive in tokens,
@@ -1075,7 +1098,7 @@ So that applications can make authorization decisions from claims alone.
 **And** adding the account to a group changes claims on the next token issued
 **And** a workload can authorize from claims without querying the directory directly
 
-### Story S7.4: Client registration Procedure
+### Story 7.4: Client registration Procedure
 
 As the operator,
 I want registering a new application to be a documented repeatable step,
@@ -1091,13 +1114,13 @@ So that the second application costs no more thought than the first.
 **And** authorization code flow with PKCE is supported
 **And** integration requires no vendor-specific client library
 
-## Epic S8: Reference application, end to end — SKELETON GATE
+## Epic 8: Reference application, end to end — SKELETON GATE
 
 The gate. The operator's own code, deployed by reconciliation, authenticating against the identity provider and authorising from claims. Reaching it proves every seam: hypervisor to storage, storage to cluster, directory to provider, provider to cluster, provider to application, repository to running workload.
 
 **FRs covered:** FR-42, FR-44 · **Governed by:** AD-3, AD-14, AD-27
 
-### Story S8.1: Reconciliation from the repository
+### Story 8.1: Reconciliation from the repository
 
 As the operator,
 I want workload state to follow the repository without me deploying,
@@ -1117,7 +1140,7 @@ So that the repository is the source of truth in practice and not just in policy
 **When** a cold start occurs with the internal registry unavailable
 **Then** those images resolve from upstream or the node image cache, never from the registry that runs inside the cluster it serves
 
-### Story S8.2: The operator's own application, authenticated
+### Story 8.2: The operator's own application, authenticated
 
 As the operator,
 I want an application I wrote running on the platform and authenticating real users,
@@ -1143,13 +1166,13 @@ So that the thing this lab exists for actually works.
 
 The skeleton proved the seams. These epics add redundancy, observability, and recoverability to layers that already work. Every story remains a Procedure under AD-3.
 
-## Epic D1: Storage depth
+## Epic 9: Storage depth
 
 Home Directories follow the operator everywhere, and the database sits on storage that suits it.
 
 **FRs covered:** FR-15, FR-18 · **Governed by:** AD-8, AD-25
 
-### Story D1.1: Portable Home Directories
+### Story 9.1: Portable Home Directories
 
 As the operator,
 I want the same home directory on every host,
@@ -1172,7 +1195,7 @@ So that I stop caring which machine I am on.
 **When** the break-glass account logs in
 **Then** its home is unaffected, because it lies outside every path the shared filesystem manages
 
-### Story D1.2: Database storage off the appliance
+### Story 9.2: Database storage off the appliance
 
 As the operator,
 I want the database on storage matched to its access pattern,
@@ -1191,13 +1214,13 @@ So that its durability guarantees are ones the medium can actually keep.
 **When** the deployment is designed
 **Then** continuous write-ahead archiving to shared storage is configured as a precondition of running at all, not deferred to the backup epic
 
-## Epic D2: Identity depth
+## Epic 10: Identity depth
 
 Identity survives losing an instance, authorisation is centrally driven, and revocation is bounded rather than indefinite.
 
 **FRs covered:** FR-13, FR-21, FR-22, FR-23, FR-25 · **Governed by:** AD-2, AD-9, AD-10, AD-26
 
-### Story D2.1: Directory replica across fault domains
+### Story 10.1: Directory replica across fault domains
 
 As the operator,
 I want identity to survive losing one instance,
@@ -1220,7 +1243,7 @@ So that patching the directory is not a platform-wide outage.
 **When** its roles are inspected
 **Then** it carries the certificate and DNS roles explicitly, and the location of the certificate-renewal role, its health check, and its relocation Procedure are named in the repository
 
-### Story D2.2: Central authorization and privilege escalation
+### Story 10.2: Central authorization and privilege escalation
 
 As the operator,
 I want host access and sudo driven by group membership,
@@ -1235,7 +1258,7 @@ So that granting or removing access is one change in one place.
 **Then** which hosts the account may access changes accordingly, without editing per-host configuration
 **And** privilege escalation rules are defined centrally and applied consistently across both OS families
 
-### Story D2.3: Bounded offline credential cache
+### Story 10.3: Bounded offline credential cache
 
 As the operator,
 I want to keep working as myself during a directory outage,
@@ -1257,7 +1280,7 @@ So that routine work does not run through a shared emergency credential.
 **When** its configuration is inspected
 **Then** an explicit maximum age is set in the repository rather than left at product default, because an unexpired cache is indistinguishable from a valid account
 
-### Story D2.4: Revocation with recorded bounds
+### Story 10.4: Revocation with recorded bounds
 
 As the operator,
 I want disabling one account to end access everywhere within a stated time,
@@ -1279,13 +1302,13 @@ So that revocation is a promise I can actually keep.
 **When** their propagation bounds are examined
 **Then** each bound is recorded in a per-party table in the repository, and an unrecorded bound is treated as a defect
 
-## Epic D3: Delivery depth
+## Epic 11: Delivery depth
 
 Images built inside the platform from committed source, traceable to their commit, with a way back.
 
 **FRs covered:** FR-43, FR-45 · **Governed by:** AD-4, AD-20, AD-27
 
-### Story D3.1: Internal registry
+### Story 11.1: Internal registry
 
 As the operator,
 I want an image registry inside the platform,
@@ -1304,7 +1327,7 @@ So that workloads do not depend on an outbound link that crosses a wireless brid
 **When** the cluster comes up
 **Then** platform-critical images resolve from upstream or the node image cache, and a Procedure verifies this rather than assuming it
 
-### Story D3.2: Images built from committed source
+### Story 11.2: Images built from committed source
 
 As the operator,
 I want images built inside the platform from what is committed,
@@ -1320,7 +1343,7 @@ So that what runs is traceable to what was written.
 **And** the resulting image is identifiable back to the commit that produced it
 **And** the image is pushed to the internal registry and pullable by the cluster
 
-### Story D3.3: Rollback through the repository
+### Story 11.3: Rollback through the repository
 
 As the operator,
 I want to return a workload to a known-good state,
@@ -1336,13 +1359,13 @@ So that a bad deployment is a minor event.
 **And** the previous state is identifiable without reconstruction from memory
 **And** reconciliation converges on the rolled-back state without manual intervention
 
-## Epic D4: Stateful services
+## Epic 12: Stateful services
 
 A database and a cache workloads can obtain through a documented Procedure, replicated and continuously archived.
 
 **FRs covered:** FR-46, FR-47, FR-48 · **Governed by:** AD-8, AD-19, AD-21, AD-26
 
-### Story D4.1: Replicated database cluster
+### Story 12.1: Replicated database cluster
 
 As the operator,
 I want the database to survive losing a Node,
@@ -1361,7 +1384,7 @@ So that node-pinned local storage does not become a single point of failure.
 **When** failover occurs
 **Then** a replica is promoted automatically and workloads reconnect
 
-### Story D4.2: Database provisioning for workloads
+### Story 12.2: Database provisioning for workloads
 
 As the operator,
 I want to give a workload a database through a documented step,
@@ -1377,7 +1400,7 @@ So that the second application is no harder than the first.
 **And** credentials reach the workload at runtime without appearing in the repository in plaintext
 **And** each workload's database is isolated from every other's
 
-### Story D4.3: Continuous archiving and proven restore
+### Story 12.3: Continuous archiving and proven restore
 
 As the operator,
 I want a database restore I have actually performed,
@@ -1390,14 +1413,14 @@ So that recoverability is evidence rather than configuration.
 **Given** the database
 **When** archiving is configured
 **Then** write-ahead archiving runs continuously to storage independent of the Node holding the data
-**And** backups run on a defined schedule without operator action, with failure detected and recorded, registered as an alert source for D5.5
+**And** backups run on a defined schedule without operator action, with failure detected and recorded, registered as an alert source for 13.5
 
 **Given** the restore Procedure
 **When** it is executed
 **Then** the database is restored to a prior point and the restored data is verified correct, not merely present
 **And** the execution is recorded, because a backup that has never been read does not count as present
 
-### Story D4.4: Cache available to workloads
+### Story 12.4: Cache available to workloads
 
 As the operator,
 I want a cache workloads can use,
@@ -1416,13 +1439,13 @@ So that applications have somewhere for ephemeral state.
 **When** dependent workloads are observed
 **Then** they degrade without data loss in the database
 
-## Epic D5: Observability
+## Epic 13: Observability
 
 The operator learns about failures from the platform rather than by noticing.
 
 **FRs covered:** FR-19, FR-36, FR-49, FR-50, FR-51 · **Governed by:** AD-12, AD-19, AD-23
 
-### Story D5.1: Metrics with bounded retention
+### Story 13.1: Metrics with bounded retention
 
 As the operator,
 I want current and historical metrics for everything,
@@ -1439,7 +1462,7 @@ So that I can answer "what changed" during a drill.
 **And** retention is a defined bounded period, so storage growth is predictable rather than discovered at exhaustion
 **And** its own memory limit is explicit, since retention is the most likely consumer of remaining capacity
 
-### Story D5.2: Centralised searchable logs
+### Story 13.2: Centralised searchable logs
 
 As the operator,
 I want logs from every host and workload in one place,
@@ -1455,7 +1478,7 @@ So that a log survives the system that produced it.
 **And** logs survive the destruction of the system that produced them
 **And** retention is bounded and stated
 
-### Story D5.3: Storage and appliance health visible
+### Story 13.3: Storage and appliance health visible
 
 As the operator,
 I want to know the appliance is unwell before it fails,
@@ -1471,7 +1494,7 @@ So that the one place holding everything is not a blind spot.
 **And** an alert fires at a defined threshold before capacity is exhausted
 **And** a drive failure produces an alert without the operator inspecting the appliance
 
-### Story D5.4: Authentication events recorded
+### Story 13.4: Authentication events recorded
 
 As the operator,
 I want to see who authenticated where,
@@ -1486,7 +1509,7 @@ So that identity has an audit trail.
 **Then** they are visible from one place, identifying account, relying party, and outcome
 **And** failed authentication is distinguishable from failed authorization
 
-### Story D5.5: Alerting in three independent tiers
+### Story 13.5: Alerting in three independent tiers
 
 As the operator,
 I want to be told about failures without watching a dashboard,
@@ -1517,13 +1540,13 @@ So that I find out from the platform rather than from a broken service.
 **When** this story completes
 **Then** every registered source is wired to notification, and the Procedure Index shows no alert source left unwired
 
-## Epic D6: Secrets management
+## Epic 14: Secrets management
 
 Secrets reach workloads at runtime and are revocable, and everything needed to recover the platform is escrowed outside it.
 
 **FRs covered:** FR-54, FR-55 · **Governed by:** AD-15, AD-24
 
-### Story D6.1: Runtime secret delivery
+### Story 14.1: Runtime secret delivery
 
 As the operator,
 I want workloads to receive secrets at runtime,
@@ -1543,7 +1566,7 @@ So that rotating one does not mean editing manifests.
 **When** it is deployed
 **Then** its unseal material is escrowed outside the platform
 
-### Story D6.2: Escrow completeness
+### Story 14.2: Escrow completeness
 
 As the operator,
 I want an exhaustive list of what lives outside the platform,
@@ -1562,13 +1585,13 @@ So that recovery does not depend on something I forgot to copy.
 **When** it is attempted
 **Then** it requires no Asgard component running, and no single machine that is not itself escrowed — a key held only on the operator's workstation fails this criterion
 
-## Epic D7: Power continuity
+## Epic 15: Power continuity
 
 An unattended power failure ends with the platform cleanly down and nothing corrupted — proven by pulling the plug.
 
 **FRs covered:** FR-56, FR-57, FR-58, FR-59, FR-60 · **Governed by:** AD-11, AD-12
 
-### Story D7.1: Battery-backed inventory
+### Story 15.1: Battery-backed inventory
 
 As the operator,
 I want everything that must act during a power failure to still have power,
@@ -1588,7 +1611,7 @@ So that the shutdown sequence does not lose its own network partway through.
 **When** its power source is considered
 **Then** it is documented as **outside** the UPS boundary, with the consequence recorded: no outbound notification can leave during a whole-house outage
 
-### Story D7.2: UPS signalling to clients
+### Story 15.2: UPS signalling to clients
 
 As the operator,
 I want the platform to learn that mains power is gone,
@@ -1604,7 +1627,7 @@ So that shutdown begins without me.
 **And** the client roster fits within the appliance's supported limit, with that limit recorded as a constraint on adding a fifth Node
 **And** shutdown begins automatically after a defined time on battery
 
-### Story D7.3: Ordered shutdown by measured margin
+### Story 15.3: Ordered shutdown by measured margin
 
 As the operator,
 I want components to power down in an order that respects what depends on what,
@@ -1623,7 +1646,7 @@ So that nothing is writing when its storage disappears.
 **Then** it is produced by **tuned delay**: the appliance's threshold is set later than the measured completion of all Node shutdowns, by a stated margin
 **And** that margin is recorded as a number in the repository, derived from measurement rather than estimation
 
-### Story D7.4: Power events visible and alerted
+### Story 15.4: Power events visible and alerted
 
 As the operator,
 I want to know the moment we are on battery,
@@ -1638,7 +1661,7 @@ So that a power event is not discovered afterwards.
 **Then** an alert is raised, and battery charge and estimated runtime are recorded as metrics
 **And** a battery approaching end of service is reported before it fails
 
-### Story D7.5: The power drill
+### Story 15.5: The power drill
 
 As the operator,
 I want to have actually pulled the plug,
@@ -1658,13 +1681,13 @@ So that the margin is proven rather than believed.
 **When** it is performed
 **Then** the drill is repeated
 
-## Epic D8: Backup and verified restore
+## Epic 16: Backup and verified restore
 
 Every class of data has a restore that has actually been performed.
 
 **FRs covered:** FR-61, FR-62, FR-63 · **Governed by:** AD-21, AD-24
 
-### Story D8.1: Native backup per data class
+### Story 16.1: Native backup per data class
 
 As the operator,
 I want each system backed up by the mechanism it provides,
@@ -1680,7 +1703,7 @@ So that I am not maintaining a general abstraction nobody understands.
 **And** no general-purpose backup abstraction layer is introduced
 **And** backups run on a defined schedule with failure raising an alert
 
-### Story D8.2: Coverage enumerated, exclusions deliberate
+### Story 16.2: Coverage enumerated, exclusions deliberate
 
 As the operator,
 I want to know exactly what is and is not protected,
@@ -1699,7 +1722,7 @@ So that gaps are decisions rather than surprises.
 **When** the limit is documented
 **Then** it is recorded explicitly that appliance loss is unrecoverable for bulk data in v1, mitigated only by the encrypted critical subset held offline
 
-### Story D8.3: Restores executed, not assumed
+### Story 16.3: Restores executed, not assumed
 
 As the operator,
 I want to have restored each class of data at least once,
@@ -1714,13 +1737,13 @@ So that "configured" is never mistaken for "working".
 **Then** the restore completes and the restored data is verified correct rather than merely present
 **And** each execution is recorded, since a configured-but-untested restore is treated as not present
 
-## Epic D9: Single sign-on breadth
+## Epic 17: Single sign-on breadth
 
 One account and one session reach every administrative interface, including services with no native support.
 
 **FRs covered:** FR-32, FR-34, FR-35, FR-39, FR-52 · **Governed by:** AD-10, AD-14
 
-### Story D9.1: Account-lock mapping — build what does not ship
+### Story 17.1: Account-lock mapping — build what does not ship
 
 As the operator,
 I want disabling an account in the directory to actually reach the identity provider,
@@ -1740,7 +1763,7 @@ So that revocation is not silently a no-op.
 **And** refresh-token grants fail, and existing provider sessions are terminated rather than left to expire
 **And** the verification is part of the Procedure, re-run on change, not a one-time check
 
-### Story D9.2: Cluster access through the identity provider
+### Story 17.2: Cluster access through the identity provider
 
 As the operator,
 I want kubectl to authenticate with my directory account,
@@ -1759,7 +1782,7 @@ So that cluster authorization follows the same groups as everything else.
 **When** the operator needs to administer the cluster
 **Then** the static administrative credential still works, remaining escrowed outside the platform
 
-### Story D9.3: Administrative interfaces behind one login
+### Story 17.3: Administrative interfaces behind one login
 
 As the operator,
 I want the hypervisor, appliance, and dashboards to accept my one account,
@@ -1779,7 +1802,7 @@ So that there is no second set of logins to maintain.
 **When** its bound is recorded
 **Then** its real ceiling is stated in the per-party table and accepted knowingly rather than assumed away
 
-### Story D9.4: Forward-auth for services without native support
+### Story 17.4: Forward-auth for services without native support
 
 As the operator,
 I want to put a login in front of a service that has none,
@@ -1798,13 +1821,13 @@ So that no internal service is protected only by nobody knowing its address.
 **When** the limitation is documented
 **Then** it is stated plainly that bypass prevention is binding-and-naming convention rather than network enforcement, acceptable only because there is one operator and no inbound path
 
-## Epic D10: Destructive rebuild drill — DOCUMENTATION GATE
+## Epic 18: Destructive rebuild drill — DOCUMENTATION GATE
 
-The second gate. S8 proved the architecture; this proves the documentation.
+The second gate. 8 proved the architecture; this proves the documentation.
 
 **FRs covered:** FR-64 · **Governed by:** AD-3, AD-22, AD-27
 
-### Story D10.1: Full platform rebuild Procedure
+### Story 18.1: Full platform rebuild Procedure
 
 As the operator,
 I want a written order for rebuilding everything,
@@ -1820,7 +1843,7 @@ So that a catastrophe is a long day rather than an open-ended one.
 **And** it requires no undocumented knowledge and no input beyond those three sources
 **And** it states explicitly which failures it does **not** cover, so its limits are known before they are discovered
 
-### Story D10.2: The destructive drill
+### Story 18.2: The destructive drill
 
 As the operator,
 I want to destroy a Node and bring it back with nothing undocumented,
