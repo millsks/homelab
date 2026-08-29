@@ -5,8 +5,14 @@ Project Asgard — a homelab platform whose entire desired state lives in this r
 Two claims are load-bearing, and everything in the tree exists to make them checkable:
 
 - **Every operational activity is a Procedure with two halves** — a Runbook *and* its Automation,
-  cross-referenced by name and enumerated in [`PROCEDURE-INDEX.md`](PROCEDURE-INDEX.md).
-  Neither half alone qualifies, with one carve-out: a class recorded in
+  cross-referenced by name and enumerated in [`PROCEDURE-INDEX.md`](PROCEDURE-INDEX.md), which is
+  the authoritative list of every Procedure the platform **requires** — one per story, except where
+  the ownership table splits a story across two owners — each with its owning layer, owning story,
+  both paths, and a status from a closed set. It enumerates what is required rather than what has
+  been built, so it is nearly all `planned` right now; that is the honest reading, and it is the
+  denominator FR-1 was missing. Start there to find out what the platform commits to. **Counts live
+  in that file's Totals section and nowhere else**, this README included — a count restated is a
+  count that goes stale. Neither half alone qualifies, with one carve-out: a class recorded in
   [`docs/OWNERSHIP.md`](docs/OWNERSHIP.md) as `Runbook` or `docs/ record` is **human-executed by
   decision** and has no Automation half. Racking a Node has no playbook and never will. Those
   Procedures are marked as such in the Index rather than counted as automation gaps, and they still
@@ -43,9 +49,21 @@ ansible/          in-guest and host OS configuration      l0-physical/ … l5-wo
 tofu/             virtual hardware and Guest existence    l0-physical/ … l5-workloads/
 k8s/              in-cluster manifests, reconciled        l0-physical/ … l5-workloads/
 runbooks/         the human form of every Procedure       l0-physical/ … l5-workloads/
+runbooks/TEMPLATE.md  the required starting point for every Runbook
 docs/             platform records that are neither runbook nor automation
 PROCEDURE-INDEX.md   authoritative enumeration of every Procedure
 ```
+
+[`runbooks/TEMPLATE.md`](runbooks/TEMPLATE.md) is not a suggestion. Each of the four requirements
+of the runbook standard is a required `####` heading inside every step block — **Command** (the
+actual commands, never "run the playbook"), **Expected output** (per checkpoint, so a divergence is
+locatable), **Automation task** (the bidirectional mapping), and **Failure modes** (what breaking
+looks like and what to check first). They are headings rather than prose labels so a dropped one is
+a hole in the outline: visible to a reader skimming, and detectable by story 1.3's audit without
+parsing sentences. The failure-mode heading additionally requires the literal `No known failure
+mode.` when there is none, because it is the section a writer under time pressure drops first.
+Every Procedure still to be written is cut from this file; without it each would invent its own
+shape.
 
 **Why one root per tool rather than one root per layer.** `ansible-lint` and kustomize each take a
 single root and walk down from it, so layer-rooting would mean six invocations apiece and six
