@@ -1,0 +1,157 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 08-28-2026 21:45
+last_updated: 08-28-2026 22:20
+project: Project Asgard
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts/stories
+development_status:
+  epic-1: in-progress
+  1-1-repository-skeleton-with-layered-ownership: review
+  1-2-procedure-index-and-the-dual-form-contract: backlog
+  1-3-convergence-test-harness: backlog
+  1-4-encrypted-secrets-before-a-secret-store-exists: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-address-plan-and-interface-allocation: backlog
+  2-2-out-of-band-management-claimed-or-disabled: backlog
+  2-3-node-build-hypervisor-dual-homed-networking: backlog
+  2-4-break-glass-access-that-survives-every-dependency: backlog
+  2-5-cluster-formation: backlog
+  2-6-declarative-guest-provisioning: backlog
+  2-7-snapshot-and-rollback: backlog
+  2-8-node-rebuild-from-the-repository: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-storage-pool-and-first-export: backlog
+  3-2-client-mount-with-deliberate-semantics: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-directory-guest-built-on-the-second-os-family: backlog
+  4-2-directory-installed-with-pinned-numeric-identity: backlog
+  4-3-dns-zone-and-records: backlog
+  4-4-time-authority: backlog
+  4-5-host-enrolment-and-network-login: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-platform-ca-with-acme: backlog
+  5-2-trust-distributed-automatically: backlog
+  5-3-automatic-issuance-and-renewal: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-control-plane-across-fault-domains: backlog
+  6-2-worker-guests-and-cluster-composition-in-the-repository: backlog
+  6-3-storage-classes-from-the-appliance: backlog
+  6-4-load-balancer-address-pool: backlog
+  6-5-gateway-with-automatic-tls: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-identity-provider-deployed: backlog
+  7-2-federation-to-the-directory: backlog
+  7-3-group-membership-as-token-claims: backlog
+  7-4-client-registration-procedure: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-reconciliation-from-the-repository: backlog
+  8-2-the-operator-s-own-application-authenticated: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog
+  9-1-portable-home-directories: backlog
+  9-2-database-storage-off-the-appliance: backlog
+  epic-9-retrospective: optional
+
+  epic-10: backlog
+  10-1-directory-replica-across-fault-domains: backlog
+  10-2-central-authorization-and-privilege-escalation: backlog
+  10-3-bounded-offline-credential-cache: backlog
+  10-4-revocation-with-recorded-bounds: backlog
+  epic-10-retrospective: optional
+
+  epic-11: backlog
+  11-1-internal-registry: backlog
+  11-2-images-built-from-committed-source: backlog
+  11-3-rollback-through-the-repository: backlog
+  epic-11-retrospective: optional
+
+  epic-12: backlog
+  12-1-replicated-database-cluster: backlog
+  12-2-database-provisioning-for-workloads: backlog
+  12-3-continuous-archiving-and-proven-restore: backlog
+  12-4-cache-available-to-workloads: backlog
+  epic-12-retrospective: optional
+
+  epic-13: backlog
+  13-1-metrics-with-bounded-retention: backlog
+  13-2-centralised-searchable-logs: backlog
+  13-3-storage-and-appliance-health-visible: backlog
+  13-4-authentication-events-recorded: backlog
+  13-5-alerting-in-three-independent-tiers: backlog
+  epic-13-retrospective: optional
+
+  epic-14: backlog
+  14-1-runtime-secret-delivery: backlog
+  14-2-escrow-completeness: backlog
+  epic-14-retrospective: optional
+
+  epic-15: backlog
+  15-1-battery-backed-inventory: backlog
+  15-2-ups-signalling-to-clients: backlog
+  15-3-ordered-shutdown-by-measured-margin: backlog
+  15-4-power-events-visible-and-alerted: backlog
+  15-5-the-power-drill: backlog
+  epic-15-retrospective: optional
+
+  epic-16: backlog
+  16-1-native-backup-per-data-class: backlog
+  16-2-coverage-enumerated-exclusions-deliberate: backlog
+  16-3-restores-executed-not-assumed: backlog
+  epic-16-retrospective: optional
+
+  epic-17: backlog
+  17-1-account-lock-mapping-build-what-does-not-ship: backlog
+  17-2-cluster-access-through-the-identity-provider: backlog
+  17-3-administrative-interfaces-behind-one-login: backlog
+  17-4-forward-auth-for-services-without-native-support: backlog
+  epic-17-retrospective: optional
+
+  epic-18: backlog
+  18-1-full-platform-rebuild-procedure: backlog
+  18-2-the-destructive-drill: backlog
+  epic-18-retrospective: optional

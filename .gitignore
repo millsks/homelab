@@ -2,3 +2,25 @@
 .bmad-loop/cache/
 .bmad-loop/policy.toml
 _bmad/render/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# tool caches, all created by `pixi run ci`
+.ruff_cache/
+.mypy_cache/
+.ansible/
+
+# OpenTofu working directories, created by `tofu init` in any root module that
+# has .tf files. NOT .terraform.lock.hcl — that file records the exact provider
+# versions resolved, AD-20 requires exact pins, and it must be COMMITTED.
+.terraform/
+
+# OpenTofu state and variables. State holds every attribute of every resource,
+# including ones the providers mark sensitive; tfvars is where credentials get
+# passed in. This repository is public — nothing here may ever be committed.
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.tfstate.lock.info
+crash.log
