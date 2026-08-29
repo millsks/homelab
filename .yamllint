@@ -39,4 +39,7 @@ ignore: |
   .claude/
   .agents/
   .bmad-loop/
-  .github/
+  # .github/agents/ is vendored agent definitions. .github/workflows/ is OURS — it is the CI gate,
+  # and ignoring the whole directory meant the one YAML file that decides whether every other file
+  # is linted was itself linted by nothing.
+  .github/agents/

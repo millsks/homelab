@@ -6,10 +6,28 @@ _bmad/render/
 .pixi/*
 !.pixi/config.toml
 
+# Python build artefacts, created by importing or running the harness in src/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
 # tool caches, all created by `pixi run ci`
 .ruff_cache/
 .mypy_cache/
+.pytest_cache/
 .ansible/
+
+# coverage output from `pixi run cov`
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# the record `pixi run drift` writes. The run is evidence; the file is a
+# per-run artefact, published by CI rather than committed.
+drift-record.json
+converge-record.json
+*-record.json
 
 # OpenTofu working directories, created by `tofu init` in any root module that
 # has .tf files. NOT .terraform.lock.hcl — that file records the exact provider

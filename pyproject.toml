@@ -1,14 +1,49 @@
 # Python tool configuration only. Package and environment management live in
 # pixi.toml; this file never declares dependencies.
 #
-# This repository is infrastructure-as-code, not a Python package: there is no
-# [project] table and no src layout. Ruff and mypy exist here for the helper
-# scripts and Ansible filter plugins that will accumulate, and to keep any
-# Python that does land held to the same standard as everywhere else.
+# This repository is infrastructure-as-code that happens to contain one Python
+# package — the convergence harness at src/asgard_harness. There is still no
+# [project] table: nothing distributes this package, and adding a build backend
+# to make `pip install -e .` work would buy nothing the PYTHONPATH the pixi
+# tasks set does not already buy. Ruff and mypy also cover the helper scripts
+# and Ansible filter plugins that will accumulate.
+
+# Metadata only: nothing builds or distributes this package (see the note above). The one field
+# that earns its place is `requires-python` — it DECLARES the supported range instead of leaving it
+# implied by whatever the lock happens to resolve, and it is the range mypy, ruff, and the CI matrix
+# all target. 3.14-only syntax reached the working tree because every checker was pointed at the
+# development version; the floor is the only setting that could have caught it.
+[project]
+name = "asgard-harness"
+version = "0.1.0"
+description = "The Asgard convergence harness: makes the repository's own definitions executable."
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --tb=short"
+markers = [
+    "integration: marks tests as integration tests requiring real I/O, network, or DB",
+]
+
+[tool.coverage.run]
+source = ["asgard_harness"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+]
 
 [tool.ruff]
 line-length = 120
-target-version = "py314"
+# The FLOOR of the supported range, never the development version. At py314 ruff accepts
+# PEP 758 unparenthesised `except A, B:` and reports "All checks passed"; at py312 it reports the
+# syntax error. The gate is only as honest as the version it targets.
+target-version = "py312"
 extend-exclude = [
     ".pixi",
     "_bmad",          # vendored BMAD tooling - upstream's code, not ours to lint
@@ -25,8 +60,18 @@ ignore = ["E501"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.isort]
+known-first-party = ["asgard_harness"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test names are the documentation. A docstring restating the function name on every
+# test is noise, and noise is what stops people reading the ones that matter.
+"tests/**" = ["D100", "D101", "D102", "D103", "D104"]
+
 [tool.mypy]
-python_version = "3.14"
+# The matrix FLOOR, not the development version — this is what catches use of a 3.13- or 3.14-only
+# API before it reaches a 3.12 runner.
+python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

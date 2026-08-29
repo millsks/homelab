@@ -102,11 +102,33 @@ respective roots and cross-reference each other by name.
 The CI gate is the definition of done:
 
 ```sh
-pixi install
-pixi run ci     # lint-py, lint-yaml, lint-ansible, check, tofu-validate
+pixi install --locked
+pixi run ci     # lint, check, tofu-validate, then the convergence harness
 ```
 
 Individual steps: `pixi run lint`, `pixi run fmt`, `pixi run check`, `pixi run tofu-validate`.
+
+### The convergence harness
+
+`src/asgard_harness/` makes this repository's own rules executable. It reads the defect classes out
+of [`PROCEDURE-INDEX.md`](PROCEDURE-INDEX.md) and [`docs/OWNERSHIP.md`](docs/OWNERSHIP.md) rather
+than restating them, so changing a rule means changing the document that states it.
+
+```sh
+pixi run test        # unit tests
+pixi run cov         # full suite with the coverage gate
+pixi run audit       # every detector against this repository; names each defect it finds
+pixi run selfcheck   # injects a known-bad fixture per defect class and proves the audit fails
+pixi run drift       # AD-23's check-mode run over the push-based layers; records the result
+```
+
+`pixi run selfcheck` is the part worth understanding. A gate that cannot fail is worse than no gate,
+so the harness injects a bad fixture for every defect class it claims to detect, asserts the audit
+exits non-zero *and names that class*, and deletes the fixture. Fixtures land in a throwaway copy of
+the repository; the working tree is never touched. A fixture that fails to provoke its defect is
+itself reported as a failure.
+
+The Procedure it implements is [`PROC-CONVERGENCE-HARNESS`](runbooks/l0-physical/convergence-harness.md).
 
 ## License
 
