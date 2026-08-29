@@ -447,7 +447,15 @@ A Node is destroyed and restored from the Repository with zero undocumented step
 
 # Phase 0 — Walking Skeleton
 
-Every story below delivers a **Procedure**: an ordered Runbook stating reasoning at each decision point, idempotent Automation, and a verification identical whichever performed the work. A story is done when the Automation reports **zero changes** against a system built by hand from its Runbook (AD-3), and when the Procedure appears in `PROCEDURE-INDEX.md` (FR-1).
+Every story below delivers a **Procedure**: an ordered Runbook, idempotent Automation, and a verification identical whichever performed the work. A story is done when the Automation reports **zero changes** against a system built by hand from its Runbook (AD-3), and when the Procedure appears in `PROCEDURE-INDEX.md` (FR-1).
+
+## Execution model
+
+The operator **delegates execution and retains diagnosis**. Automation is driven against the hardware on the operator's behalf; the operator is the one who must understand what it did when it fails.
+
+That makes the Runbook standard load-bearing rather than ceremonial. Per AD-3, every Runbook in every story below is a **complete manual procedure**, executable start to finish with no Automation available. It states the actual commands the Automation issues rather than delegating to it, states expected output at each checkpoint so a divergence is locatable, maps bidirectionally to its Automation so a failed task points at the section explaining what it was attempting, and carries a failure-mode note on any step with a known way to break.
+
+Three layers of work are genuinely manual and their Runbooks have no Automation half at all: **L0 physical** (racking, cabling, outlet allocation, firmware), the **hypervisor installation** on each Node, and the **appliance's initial setup**. These are marked as such in the Procedure Index rather than left to look like automation gaps. Everything above them is automated, and their verifications are automated even where their execution cannot be.
 
 Throughout, *the operator* is the single administrator this platform serves.
 

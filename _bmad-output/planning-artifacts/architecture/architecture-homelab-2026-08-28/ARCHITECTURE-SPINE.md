@@ -63,6 +63,15 @@ graph TD
 - **Prevents:** documentation and automation drifting until neither is trusted.
 - **Rule:** A Procedure is a Runbook **and** its Automation; neither alone qualifies. Every Procedure is listed in the **Procedure Index** in the Repository, which is the authoritative enumeration of "every operational activity". Automation run against a system built by following its Runbook by hand must report zero changes. Any difference is a documentation defect closed at discovery, never accommodated in the Automation.
 
+  **The Runbook standard.** A Runbook is a **complete manual procedure**, executable start to finish with no Automation available. A Runbook that delegates to its Automation — "run the playbook" — does not satisfy this rule, because it is worthless at the one moment it is needed: when that Automation has just failed and the operator must determine what it was attempting. Each Runbook therefore:
+
+  1. States the **actual commands the Automation issues**, in order, rather than referring to the Automation.
+  2. States **expected output at each checkpoint**, so a divergence is locatable rather than merely detectable.
+  3. **Maps bidirectionally to its Automation** — each Runbook step names the Automation task performing it, and each Automation task names its Runbook section. A failed task must point directly at the section explaining what it was doing and why.
+  4. Carries a **failure-mode note** on any step with a known way to go wrong: what the failure looks like, and what to check first.
+
+  This holds regardless of who executes. Where Automation is driven on the operator's behalf, the operator retains responsibility for diagnosis, and the Runbook is what makes that possible.
+
 ### AD-4 — The Repository is the sole source of truth
 
 - **Binds:** all
